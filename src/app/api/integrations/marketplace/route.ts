@@ -1,0 +1,98 @@
+import { NextRequest, NextResponse } from "next/server"
+
+const INTEGRATION_CATALOG = [
+  {
+    id: "misp",
+    name: "MISP",
+    description: "Malware Information Sharing Platform — push/pull threat intelligence",
+    category: "Threat Intelligence",
+    icon: "shield-alert",
+    configured: false,
+    configurable: true,
+  },
+  {
+    id: "siem",
+    name: "SIEM Export",
+    description: "Export alerts as CEF or LEEF for Splunk, QRadar, ArcSight, and other SIEMs",
+    category: "Security Operations",
+    icon: "server",
+    configured: false,
+    configurable: true,
+  },
+  {
+    id: "slack",
+    name: "Slack Notifications",
+    description: "Receive real-time alerts and search results in Slack channels",
+    category: "Notifications",
+    icon: "message-square",
+    configured: false,
+    configurable: true,
+  },
+  {
+    id: "teams",
+    name: "Microsoft Teams",
+    description: "Receive real-time alerts and search results in Teams channels",
+    category: "Notifications",
+    icon: "message-circle",
+    configured: false,
+    configurable: true,
+  },
+  {
+    id: "webhooks",
+    name: "Webhooks",
+    description: "Send event-driven HTTP callbacks to any endpoint for custom integrations",
+    category: "Automation",
+    icon: "webhook",
+    configured: false,
+    configurable: true,
+  },
+  {
+    id: "splunk",
+    name: "Splunk",
+    description: "Forward events to Splunk via HTTP Event Collector (HEC)",
+    category: "Security Operations",
+    icon: "bar-chart",
+    configured: false,
+    configurable: true,
+  },
+  {
+    id: "elastic",
+    name: "Elastic Security",
+    description: "Send findings to Elastic Security for correlation and case management",
+    category: "Security Operations",
+    icon: "layers",
+    configured: false,
+    configurable: true,
+  },
+  {
+    id: "thehive",
+    name: "TheHive",
+    description: "Create cases and alerts in TheHive incident response platform",
+    category: "Incident Response",
+    icon: "zap",
+    configured: false,
+    configurable: true,
+  },
+  {
+    id: "cortex",
+    name: "Cortex",
+    description: "Run automated analysis and response with Cortex responders",
+    category: "Incident Response",
+    icon: "brain",
+    configured: false,
+    configurable: true,
+  },
+  {
+    id: "opencti",
+    name: "OpenCTI",
+    description: "Share threat intelligence with OpenCTI knowledge graph",
+    category: "Threat Intelligence",
+    icon: "git-graph",
+    configured: false,
+    configurable: true,
+  },
+]
+
+export async function GET() {
+  return NextResponse.json({ integrations: INTEGRATION_CATALOG })
+}

@@ -1,0 +1,29 @@
+{
+  "description": "Qdrant faces collection payload schema",
+  "fields": {
+    "face_id": {
+      "type": "string",
+      "description": "Unique face identifier"
+    },
+    "image_id": {
+      "type": "string",
+      "description": "Parent image identifier"
+    },
+    "bbox": {
+      "type": "array",
+      "items": {
+        "type": "integer"
+      },
+      "description": "Bounding box [x1, y1, x2, y2]"
+    },
+    "confidence": {
+      "type": "float",
+      "description": "Face detection confidence score"
+    },
+    "path": {
+      "type": "string",
+      "description": "Path to face crop image"
+    }
+  }
+}
+

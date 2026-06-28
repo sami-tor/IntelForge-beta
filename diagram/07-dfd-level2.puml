@@ -1,0 +1,69 @@
+@startuml DFD Level 2 - Automatic Indexing Process
+skinparam backgroundColor white
+skinparam ArrowColor #1565C0
+skinparam ArrowThickness 1
+skinparam defaultFontSize 11
+skinparam linetype ortho
+
+title Level 2 DFD - Automatic Indexing Process
+
+actor "File Watcher" as Watcher
+actor "Scrapers" as Scrapers
+
+rectangle "Automatic Indexing System" {
+  component "1.0\nFile Detection" as P1
+  component "2.0\nFile Type Detection" as P2
+  component "3.0\nArchive Extraction" as P3
+  component "4.0\nDocument Processing" as P4 {
+    component "4.1\nPDF Parser" as P4_1
+    component "4.2\nDOCX Parser" as P4_2
+    component "4.3\nXLSX Parser" as P4_3
+  }
+  component "5.0\nImage Processing" as P5 {
+    component "5.1\nOCR Extraction" as P5_1
+    component "5.2\nFace Detection" as P5_2
+    component "5.3\nFace Embedding" as P5_3
+  }
+  component "6.0\nText Indexing" as P6
+  component "7.0\nFace Indexing" as P7
+  component "8.0\nMetadata Storage" as P8
+}
+
+database "Milvus" as Milvus
+database "MinIO" as MinIO
+database "Quickwit" as QW
+database "PostgreSQL" as DB
+
+Scrapers --> P1 : New files
+Watcher --> P1 : File detected
+P1 --> P2 : File path
+P2 --> P3 : Is archive?
+P2 --> P4 : Is document?
+P2 --> P5 : Is image?
+P3 --> P4 : Extracted files
+P3 --> P5 : Extracted images
+P4 --> P4_1 : PDF file
+P4 --> P4_2 : DOCX file
+P4 --> P4_3 : XLSX file
+P4_1 --> P6 : Extracted text
+P4_2 --> P6 : Extracted text
+P4_3 --> P6 : Extracted text
+P5 --> P5_1 : Image file
+P5 --> P5_2 : Image file
+P5_1 --> P6 : OCR text
+P5_2 --> P5_3 : Face detected
+P5_3 --> P7 : Face embeddings
+P6 --> QW : Index text (batch)
+P7 --> Milvus : Store embeddings
+P6 --> P8 : Text metadata
+P7 --> P8 : Face metadata
+P8 --> MinIO : Store files
+P8 --> DB : Store metadata
+QW --> P8 : Index confirmation
+Milvus --> P8 : Index confirmation
+
+@enduml
+
+
+
+

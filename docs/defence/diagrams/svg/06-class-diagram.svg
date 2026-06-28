@@ -1,0 +1,167 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 720" font-family="Helvetica,Arial,sans-serif" font-size="10">
+  <style>
+    .mod { fill:#fff; stroke:#0ea5e9; stroke-width:1.4; rx:6; ry:6; }
+    .mod-h { fill:#0ea5e9; }
+    .label { fill:#fff; font-weight:600; }
+    .col { fill:#1e293b; }
+    .public { fill:#16a34a; }
+    .private { fill:#94a3b8; }
+    .dep { stroke:#94a3b8; stroke-width:1; fill:none; stroke-dasharray:3 3; marker-end:url(#arr); }
+  </style>
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#94a3b8"/>
+    </marker>
+  </defs>
+  <text x="380" y="22" text-anchor="middle" class="col" font-weight="600" font-size="14">Module / Class structure</text>
+
+  <g transform="translate(20,40)">
+    <rect width="220" height="135" class="mod"/>
+    <rect width="220" height="22" class="mod-h"/>
+    <text x="110" y="16" text-anchor="middle" class="label">threat-score.ts</text>
+    <text x="10" y="40" class="public">+ computeAndPersistThreatScore()</text>
+    <text x="10" y="54" class="public">+ getLatestThreatScore()</text>
+    <text x="10" y="68" class="public">+ getThreatScoreHistory(hours)</text>
+    <text x="10" y="84" class="private">- collectComponents() · 10 COUNTs</text>
+    <text x="10" y="98" class="private">- scoreFromComponents()</text>
+    <text x="10" y="112" class="private">- getPreviousScore()</text>
+    <text x="10" y="128" class="col">emits NOTIFY: score.updated</text>
+  </g>
+
+  <g transform="translate(265,40)">
+    <rect width="240" height="155" class="mod"/>
+    <rect width="240" height="22" class="mod-h"/>
+    <text x="120" y="16" text-anchor="middle" class="label">correlator.ts (+ correlator-nlp.ts)</text>
+    <text x="10" y="40" class="public">+ runCorrelationPass()</text>
+    <text x="10" y="54" class="public">+ getTopClusters(limit)</text>
+    <text x="10" y="68" class="private">- fetchAnchorCves(limit)</text>
+    <text x="10" y="82" class="private">- fetchExploitsForCves(ids)</text>
+    <text x="10" y="96" class="private">- fetchNewsForCves(ids)</text>
+    <text x="10" y="110" class="private">- findAliasMatches() (NLP)</text>
+    <text x="10" y="124" class="private">- findFuzzyDescriptionMatches() (pg_trgm)</text>
+    <text x="10" y="138" class="private">- scoreCluster() · buildSummary()</text>
+    <text x="10" y="152" class="col">emits NOTIFY: cluster.upserted</text>
+  </g>
+
+  <g transform="translate(530,40)">
+    <rect width="210" height="135" class="mod"/>
+    <rect width="210" height="22" class="mod-h"/>
+    <text x="105" y="16" text-anchor="middle" class="label">trends.ts</text>
+    <text x="10" y="40" class="public">+ captureTrends()</text>
+    <text x="10" y="54" class="public">+ getTrendSeries(days)</text>
+    <text x="10" y="68" class="private">- METRICS array (7 KPIs)</text>
+    <text x="10" y="84" class="col">emerging threshold per metric</text>
+    <text x="10" y="98" class="col">unique on (metric_key, bucket_date)</text>
+  </g>
+
+  <g transform="translate(20,200)">
+    <rect width="220" height="155" class="mod"/>
+    <rect width="220" height="22" class="mod-h"/>
+    <text x="110" y="16" text-anchor="middle" class="label">forecast.ts (+ backtest)</text>
+    <text x="10" y="40" class="public">+ generateForecastsAndAnomalies()</text>
+    <text x="10" y="54" class="public">+ runForecastBacktest(horizon)</text>
+    <text x="10" y="68" class="public">+ getForecasts() · getLatestAccuracy()</text>
+    <text x="10" y="82" class="public">+ getBestMethodPerMetric()</text>
+    <text x="10" y="96" class="private">- holt() · holtWinters() · naive()</text>
+    <text x="10" y="110" class="private">- forecastConfidence()</text>
+    <text x="10" y="124" class="private">- mape() · rmse() · mae()</text>
+    <text x="10" y="138" class="col">emits NOTIFY: anomaly.detected</text>
+  </g>
+
+  <g transform="translate(265,200)">
+    <rect width="240" height="155" class="mod"/>
+    <rect width="240" height="22" class="mod-h"/>
+    <text x="120" y="16" text-anchor="middle" class="label">action-queue.ts (+ action-collab.ts)</text>
+    <text x="10" y="40" class="public">+ generateActions()</text>
+    <text x="10" y="54" class="public">+ listActions(status, limit)</text>
+    <text x="10" y="68" class="public">+ updateActionStatus(id, status, user)</text>
+    <text x="10" y="82" class="public">+ assignAction() · listComments() · addComment()</text>
+    <text x="10" y="96" class="public">+ listAuditEntries() · recordAudit()</text>
+    <text x="10" y="110" class="private">- upsertAction() · severityToPriority()</text>
+    <text x="10" y="124" class="col">SHA-256 action_key dedup</text>
+    <text x="10" y="138" class="col">emits NOTIFY: action.created</text>
+  </g>
+
+  <g transform="translate(530,200)">
+    <rect width="210" height="135" class="mod"/>
+    <rect width="210" height="22" class="mod-h"/>
+    <text x="105" y="16" text-anchor="middle" class="label">geo-sector.ts</text>
+    <text x="10" y="40" class="public">+ captureGeoAndSector()</text>
+    <text x="10" y="54" class="public">+ getLatestGeoSnapshot()</text>
+    <text x="10" y="68" class="public">+ getLatestSectorSnapshot()</text>
+    <text x="10" y="82" class="private">- fetchGroupedCounts()</text>
+    <text x="10" y="96" class="private">- rankToScore() · toCode()</text>
+    <text x="10" y="110" class="col">weighted total: 4R + 1.5P + 2.5D</text>
+  </g>
+
+  <g transform="translate(20,380)">
+    <rect width="220" height="135" class="mod"/>
+    <rect width="220" height="22" class="mod-h"/>
+    <text x="110" y="16" text-anchor="middle" class="label">briefing-generator.ts</text>
+    <text x="10" y="40" class="public">+ generateDailyBriefing()</text>
+    <text x="10" y="54" class="public">+ getLatestBriefing(type)</text>
+    <text x="10" y="68" class="public">+ listBriefings(limit)</text>
+    <text x="10" y="82" class="private">- collectMetrics() · buildHeadline()</text>
+    <text x="10" y="96" class="private">- buildNarrative() · buildHighlights()</text>
+    <text x="10" y="110" class="private">- maybeRewriteSummary() (LLM)</text>
+    <text x="10" y="124" class="col">emits NOTIFY: briefing.published</text>
+  </g>
+
+  <g transform="translate(265,380)">
+    <rect width="240" height="135" class="mod"/>
+    <rect width="240" height="22" class="mod-h"/>
+    <text x="120" y="16" text-anchor="middle" class="label">orchestrator.ts</text>
+    <text x="10" y="40" class="public">+ runFullAutomation()</text>
+    <text x="10" y="54" class="public">+ getAutomationRuns(limit)</text>
+    <text x="10" y="68" class="private">- logRunStart() · logRunEnd()</text>
+    <text x="10" y="84" class="col">8 isolated stages, try/catch each</text>
+    <text x="10" y="98" class="col">cleans rate-log on each cycle</text>
+    <text x="10" y="112" class="col">emits NOTIFY: pipeline.complete</text>
+  </g>
+
+  <g transform="translate(530,380)">
+    <rect width="210" height="135" class="mod"/>
+    <rect width="210" height="22" class="mod-h"/>
+    <text x="105" y="16" text-anchor="middle" class="label">events.ts (LISTEN/NOTIFY)</text>
+    <text x="10" y="40" class="public">+ emitAutomationEvent(type, data)</text>
+    <text x="10" y="54" class="public">+ subscribe(callback)</text>
+    <text x="10" y="68" class="public">+ shutdownListener()</text>
+    <text x="10" y="84" class="col">single LISTEN connection per process</text>
+    <text x="10" y="98" class="col">in-memory subscriber set</text>
+    <text x="10" y="112" class="col">payload size-capped at 7800B</text>
+  </g>
+
+  <g transform="translate(20,540)">
+    <rect width="220" height="115" class="mod"/>
+    <rect width="220" height="22" class="mod-h"/>
+    <text x="110" y="16" text-anchor="middle" class="label">notifications.ts</text>
+    <text x="10" y="40" class="public">+ notifyBriefing()</text>
+    <text x="10" y="54" class="public">+ notifyAnomalies()</text>
+    <text x="10" y="68" class="public">+ notifyCriticalClusters()</text>
+    <text x="10" y="82" class="public">+ listNotifications(limit)</text>
+    <text x="10" y="96" class="col">writes intel_notification_log</text>
+  </g>
+
+  <g transform="translate(265,540)">
+    <rect width="240" height="115" class="mod"/>
+    <rect width="240" height="22" class="mod-h"/>
+    <text x="120" y="16" text-anchor="middle" class="label">briefing-pdf.ts (+ briefing-llm.ts)</text>
+    <text x="10" y="40" class="public">+ generateBriefingPdf(briefing)</text>
+    <text x="10" y="54" class="public">+ getLlmConfig()</text>
+    <text x="10" y="68" class="public">+ maybeRewriteSummary()</text>
+    <text x="10" y="82" class="col">deterministic fallback always present</text>
+    <text x="10" y="96" class="col">supports OpenAI / Anthropic / Gemini</text>
+  </g>
+
+  <g transform="translate(530,540)">
+    <rect width="210" height="115" class="mod"/>
+    <rect width="210" height="22" class="mod-h"/>
+    <text x="105" y="16" text-anchor="middle" class="label">cron-rate-limit.ts</text>
+    <text x="10" y="40" class="public">+ checkCronRateLimit()</text>
+    <text x="10" y="54" class="public">+ pruneCronRateLog()</text>
+    <text x="10" y="68" class="col">10 calls/min/IP default</text>
+    <text x="10" y="82" class="col">429 + Retry-After header</text>
+  </g>
+
+  <text x="380" y="700" text-anchor="middle" class="col">All modules read/write through query() (lib/db.ts:62-77). No upstream API calls at runtime.</text>
+</svg>

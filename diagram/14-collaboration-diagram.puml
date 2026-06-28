@@ -1,0 +1,41 @@
+@startuml Collaboration Diagram - Text Search
+skinparam backgroundColor white
+skinparam linetype polyline
+skinparam ArrowColor #1565C0
+skinparam ArrowThickness 1
+skinparam defaultFontSize 11
+
+title Collaboration Diagram - Text Search Use Case
+
+object User
+object SearchPage
+object SearchAPI
+object AuthMiddleware
+object QuotaManager
+object QuickwitClient
+object SearchLogger
+object Database
+
+User --> SearchPage : 1: interact()
+SearchPage --> SearchAPI : 2: sendRequest()
+SearchAPI --> AuthMiddleware : 3: validateAuth()
+AuthMiddleware --> Database : 4: checkSession()
+Database --> AuthMiddleware : 5: sessionData
+AuthMiddleware --> SearchAPI : 6: authenticated
+SearchAPI --> QuotaManager : 7: checkQuota()
+QuotaManager --> Database : 8: getQuota()
+Database --> QuotaManager : 9: quotaInfo
+QuotaManager --> SearchAPI : 10: quotaAvailable
+SearchAPI --> QuickwitClient : 11: search()
+QuickwitClient --> SearchAPI : 12: results
+SearchAPI --> SearchLogger : 13: logSearch()
+SearchLogger --> Database : 14: saveLog()
+SearchAPI --> QuotaManager : 15: updateQuota()
+QuotaManager --> Database : 16: decrementQuota()
+SearchAPI --> SearchPage : 17: returnResults()
+SearchPage --> User : 18: displayResults()
+
+@enduml
+
+
+

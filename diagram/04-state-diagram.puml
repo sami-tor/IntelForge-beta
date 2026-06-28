@@ -1,0 +1,71 @@
+@startuml State Diagram - Intel Forge
+skinparam backgroundColor white
+skinparam linetype polyline
+skinparam defaultFontSize 11
+skinparam state {
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+  FontColor #0D47A1
+  ArrowColor #1565C0
+}
+skinparam ArrowColor #1565C0
+
+title <b>State Diagram</b>\nUser Session & Action Queue Lifecycle
+
+[*] --> NotAuthenticated
+
+state "Not Authenticated" as NotAuthenticated {
+  [*] --> LoginPage
+  LoginPage --> Registering : register
+  LoginPage --> Authenticating : login
+  Registering --> VerificationPending : success
+  VerificationPending --> Authenticated : verified
+}
+
+state "Authenticating" as Authenticating {
+  [*] --> CheckCredentials
+  CheckCredentials --> TwoFactorCheck : 2FA enabled
+  CheckCredentials --> Authenticated : no 2FA
+  TwoFactorCheck --> Authenticated : 2FA passed
+  TwoFactorCheck --> NotAuthenticated : 2FA failed
+  CheckCredentials --> NotAuthenticated : bad credentials
+}
+
+state "Authenticated" as Authenticated {
+  [*] --> Dashboard
+  Dashboard --> IntelHub : view intelligence
+  Dashboard --> CommandCenter : view automation
+  Dashboard --> ActionQueue : manage tasks
+  Dashboard --> HuntBuilder : run queries
+  IntelHub --> Dashboard : back
+  CommandCenter --> Dashboard : back
+  ActionQueue --> Dashboard : back
+  HuntBuilder --> Dashboard : back
+}
+
+Authenticated --> NotAuthenticated : logout
+Authenticated --> NotAuthenticated : session expired
+
+' --- Action Queue Item States ---
+
+state "Action Lifecycle" as ActionLC {
+  [*] --> Open : pipeline emits
+  Open --> InProgress : analyst starts
+  Open --> Dismissed : analyst dismisses
+  InProgress --> Done : analyst completes
+  InProgress --> Open : analyst reopens
+  Done --> Open : analyst reopens
+  Dismissed --> Open : analyst reopens
+  Done --> [*]
+  Dismissed --> [*]
+}
+
+note right of ActionLC
+  Pipeline re-emission is idempotent
+  on action_key (SHA-256).
+  Re-emission updates priority/steps
+  but never overwrites analyst status.
+end note
+
+@enduml
+

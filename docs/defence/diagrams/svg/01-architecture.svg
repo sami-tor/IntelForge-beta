@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 580" font-family="Helvetica,Arial,sans-serif" font-size="11">
+  <style>
+    .layer { fill:#f8fafc; stroke:#cbd5e1; }
+    .layer-new { fill:#e0f2fe; stroke:#0ea5e9; stroke-width:1.5; }
+    .layer-out { fill:#fef3c7; stroke:#f59e0b; }
+    .label { fill:#0f172a; font-weight:600; }
+    .sub { fill:#475569; font-size:10px; }
+    .arrow { stroke:#0ea5e9; stroke-width:1.4; fill:none; marker-end:url(#arr); }
+    .arrow-thin { stroke:#94a3b8; stroke-width:1; fill:none; marker-end:url(#arr); stroke-dasharray:3 3; }
+    .pill { fill:#fff; stroke:#cbd5e1; rx:4; ry:4; }
+    .pill-new { fill:#fff; stroke:#0ea5e9; rx:4; ry:4; }
+  </style>
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#0ea5e9"/>
+    </marker>
+  </defs>
+
+  <text x="360" y="22" text-anchor="middle" class="label" font-size="14">IntelForge — System Architecture</text>
+
+  <rect x="20" y="42" width="680" height="58" rx="8" class="layer"/>
+  <text x="35" y="62" class="label">External Threat Feeds (read-only)</text>
+  <text x="35" y="80" class="sub">NVD CVEs · CISA KEV · ExploitDB · Ransomware leak sites · Phishing intel · Dark-web · MITRE ATT&amp;CK · News RSS</text>
+  <line x1="360" y1="100" x2="360" y2="115" class="arrow"/>
+
+  <rect x="20" y="120" width="680" height="58" rx="8" class="layer"/>
+  <text x="35" y="140" class="label">Feed-sync Layer (existing)</text>
+  <text x="35" y="158" class="sub">app/api/cron/intel-sync · lib/intel/fetchers/*.ts</text>
+  <text x="35" y="172" class="sub">→ writes to intel_cve_cache · intel_news_cache · intel_ransomware_* · intel_exploit_cache · intel_phishing_cache · ...</text>
+  <line x1="360" y1="178" x2="360" y2="193" class="arrow"/>
+
+  <rect x="20" y="200" width="680" height="200" rx="8" class="layer-new"/>
+  <text x="35" y="220" class="label">Automation Layer (this project)</text>
+  <text x="35" y="236" class="sub">Orchestrator · lib/intel/automation/orchestrator.ts:60-179</text>
+
+  <g>
+    <rect x="50" y="252" width="120" height="38" class="pill-new"/>
+    <text x="110" y="270" text-anchor="middle" class="label" font-size="10">threat-score</text>
+    <text x="110" y="282" text-anchor="middle" class="sub" font-size="9">composite 0-100</text>
+
+    <rect x="180" y="252" width="120" height="38" class="pill-new"/>
+    <text x="240" y="270" text-anchor="middle" class="label" font-size="10">correlator</text>
+    <text x="240" y="282" text-anchor="middle" class="sub" font-size="9">+NLP aliases</text>
+
+    <rect x="310" y="252" width="120" height="38" class="pill-new"/>
+    <text x="370" y="270" text-anchor="middle" class="label" font-size="10">trends</text>
+    <text x="370" y="282" text-anchor="middle" class="sub" font-size="9">7 KPI counters</text>
+
+    <rect x="440" y="252" width="120" height="38" class="pill-new"/>
+    <text x="500" y="270" text-anchor="middle" class="label" font-size="10">forecast</text>
+    <text x="500" y="282" text-anchor="middle" class="sub" font-size="9">Holt + HW + naive</text>
+
+    <rect x="570" y="252" width="120" height="38" class="pill-new"/>
+    <text x="630" y="270" text-anchor="middle" class="label" font-size="10">geo / sector</text>
+    <text x="630" y="282" text-anchor="middle" class="sub" font-size="9">risk index</text>
+
+    <rect x="50" y="305" width="120" height="38" class="pill-new"/>
+    <text x="110" y="323" text-anchor="middle" class="label" font-size="10">action-queue</text>
+    <text x="110" y="335" text-anchor="middle" class="sub" font-size="9">prio + audit + bulk</text>
+
+    <rect x="180" y="305" width="120" height="38" class="pill-new"/>
+    <text x="240" y="323" text-anchor="middle" class="label" font-size="10">briefing</text>
+    <text x="240" y="335" text-anchor="middle" class="sub" font-size="9">deterministic + LLM</text>
+
+    <rect x="310" y="305" width="120" height="38" class="pill-new"/>
+    <text x="370" y="323" text-anchor="middle" class="label" font-size="10">attribution</text>
+    <text x="370" y="335" text-anchor="middle" class="sub" font-size="9">caused_by</text>
+
+    <rect x="440" y="305" width="120" height="38" class="pill-new"/>
+    <text x="500" y="323" text-anchor="middle" class="label" font-size="10">backtest</text>
+    <text x="500" y="335" text-anchor="middle" class="sub" font-size="9">MAPE/RMSE/MAE</text>
+
+    <rect x="570" y="305" width="120" height="38" class="pill-new"/>
+    <text x="630" y="323" text-anchor="middle" class="label" font-size="10">notifications</text>
+    <text x="630" y="335" text-anchor="middle" class="sub" font-size="9">webhook + NOTIFY</text>
+  </g>
+
+  <text x="35" y="370" class="sub">All modules read/write through query() · idempotent on upsert keys · re-runnable each cron cycle</text>
+  <text x="35" y="386" class="sub">Postgres LISTEN/NOTIFY broadcasts to SSE listeners; webhook fan-out delivers to SIEM/Slack</text>
+
+  <line x1="360" y1="400" x2="360" y2="415" class="arrow"/>
+
+  <rect x="20" y="422" width="680" height="80" rx="8" class="layer-out"/>
+  <text x="35" y="442" class="label">Output channels</text>
+  <g>
+    <rect x="50" y="455" width="100" height="32" class="pill"/>
+    <text x="100" y="475" text-anchor="middle" font-size="10">SSR pages</text>
+
+    <rect x="160" y="455" width="100" height="32" class="pill"/>
+    <text x="210" y="475" text-anchor="middle" font-size="10">REST + Swagger</text>
+
+    <rect x="270" y="455" width="100" height="32" class="pill"/>
+    <text x="320" y="475" text-anchor="middle" font-size="10">SSE stream</text>
+
+    <rect x="380" y="455" width="100" height="32" class="pill"/>
+    <text x="430" y="475" text-anchor="middle" font-size="10">PDF export</text>
+
+    <rect x="490" y="455" width="100" height="32" class="pill"/>
+    <text x="540" y="475" text-anchor="middle" font-size="10">Webhook fan-out</text>
+
+    <rect x="600" y="455" width="90" height="32" class="pill"/>
+    <text x="645" y="475" text-anchor="middle" font-size="10">Hunt builder</text>
+  </g>
+
+  <text x="360" y="540" text-anchor="middle" class="sub">Reads always served from local cache — survives upstream outages</text>
+</svg>

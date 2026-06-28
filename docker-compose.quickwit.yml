@@ -1,0 +1,273 @@
+services:
+  # Quickwit Search Engine
+  quickwit:
+    image: quickwit/quickwit:latest
+    container_name: intelforge-quickwit
+    ports:
+      - "7280:7280" # REST API
+      - "7281:7281" # gRPC
+    volumes:
+      - ./data:/data:ro # Read-only access to data files (Quickwit doesn't need write access)
+      - quickwit-data:/quickwit/data
+      - ./quickwit-config:/quickwit/config
+    environment:
+      - QW_CONFIG=/quickwit/config/quickwit.yaml
+      - QW_NODE_ID=node-1
+    command: run
+    restart: unless-stopped
+    networks:
+      - intelforge-network
+    healthcheck:
+      test: [ "CMD", "curl", "-sf", "http://localhost:7280/api/v1/cluster" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # PostgreSQL (for user management only)
+  postgres:
+    image: postgres:16-alpine
+    container_name: intelforge-postgres
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_DB=intelforge
+      - POSTGRES_USER=intelforge
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-intelforge2024}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./scripts/database.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    restart: unless-stopped
+    networks:
+      - intelforge-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U intelforge" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Quickwit Auto-Indexer (watches /data and automatically indexes new files)
+  auto-indexer:
+    build:
+      context: ./indexer
+      dockerfile: Dockerfile
+    container_name: intelforge-auto-indexer
+    volumes:
+      - ./data:/data # Read-write access (needed to delete files after indexing)
+      - indexer-state:/tmp # Persistent storage for indexed files database
+    environment:
+      - QUICKWIT_URL=http://host.docker.internal:7280 # Connect to Quickwit on host (Windows/Mac)
+      - VISUAL_SEARCH_SERVICE_URL=http://intelforge-visual-search:8000 # Connect to visual search service
+      - DATA_DIRECTORY=/data
+      - INDEX_NAME=osint-data
+      - IMAGE_INDEX_NAME=osint-data-images
+      - INDEXED_FILES_DB=/tmp/indexed_files.json
+      - PYTHONUNBUFFERED=1 # Force unbuffered output for logs
+    # Quickwit is already running, so we don't depend on it being started by docker-compose
+    restart: unless-stopped # Run continuously, auto-restart if it crashes
+    # Use extra_hosts to enable host.docker.internal on all platforms
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - intelforge-network # Add to network to access visual-search-service
+    healthcheck:
+      test: [ "CMD", "python", "-c", "import os; exit(0 if os.path.exists('/tmp/indexed_files.json') else 1)" ]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Visual Search Service (CLIP embeddings and similarity search)
+  visual-search-service:
+    build:
+      context: ./visual-search
+      dockerfile: service/Dockerfile
+    volumes:
+      - ./visual-search/processor:/app/processor:ro
+      - ./lib:/app/lib:ro # Mount lib utilities
+      - ./services:/app/services # Mount services directory for image_indexer (read-write so changes apply)
+      - ./data:/data # Access to data directory for images
+    container_name: intelforge-visual-search
+    ports:
+      - "8000:8000"
+    environment:
+      - MILVUS_HOST=milvus
+      - MILVUS_PORT=19530
+      - MILVUS_IMAGES_COLLECTION=images
+      - MILVUS_FACES_COLLECTION=faces
+      - MINIO_ENDPOINT=minio:9000
+      - MINIO_ACCESS_KEY=${MINIO_ROOT_USER:-minioadmin}
+      - MINIO_SECRET_KEY=${MINIO_ROOT_PASSWORD:-minioadmin}
+      - MINIO_BUCKET=intelforge-images
+      - MINIO_PUBLIC_URL=http://localhost:9000/intelforge-images
+      - QUICKWIT_URL=http://quickwit:7280
+      - PYTHONUNBUFFERED=1
+    depends_on:
+      - milvus
+      - minio
+      - quickwit
+    restart: unless-stopped
+    networks:
+      - intelforge-network
+
+  # Qdrant Vector Database
+  # Milvus Vector Database (replaces Qdrant)
+  etcd:
+    image: quay.io/coreos/etcd:v3.5.5
+    container_name: intelforge-etcd
+    environment:
+      - ETCD_AUTO_COMPACTION_MODE=revision
+      - ETCD_AUTO_COMPACTION_RETENTION=1000
+      - ETCD_QUOTA_BACKEND_BYTES=4294967296
+      - ETCD_SNAPSHOT_COUNT=50000
+    volumes:
+      - etcd-data:/etcd
+    command: etcd -advertise-client-urls=http://127.0.0.1:2379 -listen-client-urls http://0.0.0.0:2379 --data-dir /etcd
+    restart: unless-stopped
+    networks:
+      - intelforge-network
+    healthcheck:
+      test: [ "CMD", "etcdctl", "endpoint", "health" ]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  milvus:
+    image: milvusdb/milvus:v2.4.0
+    container_name: intelforge-milvus
+    ports:
+      - "19530:19530" # gRPC  
+      - "9091:9091" # Metrics
+    volumes:
+      - milvus-data:/var/lib/milvus
+    environment:
+      - ETCD_ENDPOINTS=etcd:2379
+      - MINIO_ADDRESS=minio:9000
+      - MINIO_ACCESS_KEY_ID=${MINIO_ROOT_USER:-minioadmin}
+      - MINIO_SECRET_ACCESS_KEY=${MINIO_ROOT_PASSWORD:-minioadmin}
+    command: [ "milvus", "run", "standalone" ]
+    depends_on:
+      - etcd
+      - minio
+    restart: unless-stopped
+    networks:
+      - intelforge-network
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9091/healthz" ]
+      interval: 30s
+      start_period: 90s
+      timeout: 20s
+      retries: 3
+
+  # MinIO Object Storage (S3-compatible)
+  minio:
+    image: minio/minio:latest
+    container_name: intelforge-minio
+    ports:
+      - "9000:9000" # API
+      - "9001:9001" # Console
+    volumes:
+      - minio-data:/data
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER:-minioadmin}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD:-minioadmin}
+    command: server /data --console-address ":9001"
+    restart: unless-stopped
+    networks:
+      - intelforge-network
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Telegram Scraper (monitors Telegram channels/groups)
+  telegram-scraper:
+    build:
+      context: ./telegram-scraper
+      dockerfile: Dockerfile
+    container_name: intelforge-telegram-scraper
+    volumes:
+      - ./data:/data # Shared with auto-indexer
+      - telegram-session:/app # Persistent session storage
+    environment:
+      - TELEGRAM_API_ID=26769516
+      - TELEGRAM_API_HASH=3686fa6fdd76b3d50e30af1b425a745d
+      - TELEGRAM_PHONE=+923171418815
+      - TELEGRAM_SESSION=telegram_session
+      - DATA_DIRECTORY=/data
+      - CHAT_IDS_FILE=/app/chat_ids.txt
+      # - MT_PROXY=${MT_PROXY:-tg://proxy?server=14.102.10.153&port=8443&secret=eeNEgYdJvXrFGRMCIMJdCQ&bot=@mtpro_xyz_bot}  # Disabled - causing proxy error
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    networks:
+      - intelforge-network
+
+  # Manual Indexer (run once to index all files, optional)
+  indexer:
+    build:
+      context: ./indexer
+      dockerfile: Dockerfile
+    container_name: intelforge-indexer
+    volumes:
+      - ./data:/data:ro
+    environment:
+      - QUICKWIT_URL=http://quickwit:7280
+      - DATA_DIRECTORY=/data
+      - INDEX_NAME=osint-data
+    command: [ "python", "indexer.py" ] # Override to use manual indexer
+    depends_on:
+      quickwit:
+        condition: service_healthy
+    restart: "no" # Run once, then stop
+    networks:
+      - intelforge-network
+    profiles:
+      - manual # Only start with: docker-compose --profile manual up indexer
+
+  # Threads Profile Scraper (auto-scrapes Threads profiles)
+  threads-scraper:
+    build:
+      context: ./services/threads_scraper
+      dockerfile: Dockerfile
+    container_name: intelforge-threads-scraper
+    volumes:
+      - ./data:/data # For usernames file
+      - ./services:/app/services # Mount all services (threads_scraper + image_indexer)
+    environment:
+      - PYTHONPATH=/app/services
+      - THREADS_USERNAMES_FILE=/data/threads_usernames.txt
+      - THREADS_SCAN_INTERVAL=3600
+      - MINIO_ENDPOINT=minio:9000
+      - MINIO_ACCESS_KEY=${MINIO_ROOT_USER:-minioadmin}
+      - MINIO_SECRET_KEY=${MINIO_ROOT_PASSWORD:-minioadmin}
+      - MINIO_BUCKET=intelforge-images
+      - MILVUS_HOST=milvus
+      - MILVUS_PORT=19530
+      - QUICKWIT_URL=http://quickwit:7280
+    depends_on:
+      - milvus
+      - minio
+      - quickwit
+    restart: unless-stopped
+    networks:
+      - intelforge-network
+
+volumes:
+  quickwit-data:
+    driver: local
+  postgres-data:
+    driver: local
+  indexer-state:
+    driver: local
+  telegram-session:
+    driver: local
+  milvus-data:
+    driver: local
+  etcd-data:
+    driver: local
+  minio-data:
+    driver: local
+
+networks:
+  intelforge-network:
+    driver: bridge

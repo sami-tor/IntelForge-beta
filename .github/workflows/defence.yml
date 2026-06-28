@@ -1,0 +1,79 @@
+name: Defence test + PDF
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  defence:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: intelforge
+          POSTGRES_PASSWORD: intelforge
+          POSTGRES_DB: intelforge
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+        ports:
+          - 5432:5432
+    env:
+      DATABASE_URL: postgres://intelforge:intelforge@localhost:5432/intelforge
+      JWT_SECRET: ${{ secrets.JWT_SECRET || '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef' }}
+      JWT_REFRESH_SECRET: ${{ secrets.JWT_REFRESH_SECRET || 'fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210' }}
+      SESSION_SECRET: ${{ secrets.SESSION_SECRET || '00000000aaaaaaaa00000000bbbbbbbb00000000cccccccc00000000dddddddd' }}
+      RESPONSE_SIGNING_SECRET: ${{ secrets.RESPONSE_SIGNING_SECRET || '11111111aaaaaaaa11111111bbbbbbbb11111111cccccccc11111111dddddddd' }}
+      CRON_SECRET: defence-test-secret
+      DEFENCE_BASE_URL: http://localhost:3000
+      DEFENCE_PG_CONTAINER: postgres
+      DEFENCE_PG_USER: intelforge
+      DEFENCE_PG_DB: intelforge
+      NODE_ENV: test
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: TypeScript check
+        run: npx tsc --noEmit -p tsconfig.json
+
+      - name: Apply migrations
+        env:
+          PGPASSWORD: intelforge
+        run: |
+          for f in scripts/intel-feeds-migration.sql \
+                   scripts/intel-advanced-feeds-migration.sql \
+                   scripts/intel-automation-migration.sql \
+                   scripts/intel-automation-v2-migration.sql \
+                   scripts/intel-automation-v3-migration.sql \
+                   scripts/intel-automation-v4-migration.sql \
+                   scripts/seed-trend-history.sql \
+                   scripts/seed-correlation-demo.sql; do
+            if [ -f "$f" ]; then
+              echo "Applying $f"
+              psql -h localhost -U intelforge -d intelforge -f "$f" -v ON_ERROR_STOP=1 -q
+            fi
+          done
+
+      - name: Build defence PDF
+        run: npm run defence:pdf
+
+      - name: Upload PDF artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: IntelForge_FYP_Defence
+          path: docs/defence/IntelForge_FYP_Defence.pdf
+          retention-days: 90

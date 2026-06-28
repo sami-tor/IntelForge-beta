@@ -1,0 +1,70 @@
+@startuml DFD Level 0 - Intel Forge
+skinparam backgroundColor white
+skinparam ArrowColor #1565C0
+skinparam ArrowThickness 1
+skinparam defaultFontSize 11
+skinparam linetype ortho
+
+title Level 0 DFD - Intel Forge System Context
+
+actor "User" as User
+actor "Admin" as Admin
+actor "System" as System
+
+rectangle "Intel Forge OSINT System" {
+  component "Face Search System" as FS
+  component "Text Search System" as TS
+  component "Automatic Indexing System" as AIS
+  component "Data Collection System" as DCS
+  component "Threat Intelligence System" as TIS
+  component "User Management System" as UMS
+  component "Admin Management System" as AMS
+  component "Authentication System" as Auth
+}
+
+database "PostgreSQL" as DB
+database "Milvus" as Milvus
+database "MinIO" as MinIO
+database "Quickwit" as QW
+
+actor "External Sources" as Sources
+
+User --> FS : Search face by image
+User --> TS : Search text in files
+User --> Auth : Login/Register
+User --> UMS : View profile/quota
+User --> TIS : View threat alerts
+
+Admin --> AMS : Manage users/stats
+Admin --> Auth : Admin login
+Admin --> TIS : Configure threat monitoring
+
+Sources --> DCS : Telegram channels
+Sources --> DCS : Web content
+Sources --> DCS : Dark web sites
+
+DCS --> AIS : Scraped data
+AIS --> Milvus : Store face embeddings
+AIS --> MinIO : Store files/images
+AIS --> QW : Index text content
+AIS --> DB : Store metadata
+
+FS --> Milvus : Query face embeddings
+FS --> MinIO : Retrieve images
+FS --> DB : Log search
+
+TS --> QW : Search indexed files
+TS --> DB : Log search
+
+TIS --> QW : Search for threats
+TIS --> Milvus : Search for brands
+TIS --> DB : Store alerts
+
+UMS --> DB : Read/Write user data
+AMS --> DB : Read/Write admin data
+Auth --> DB : Verify credentials
+
+@enduml
+
+
+

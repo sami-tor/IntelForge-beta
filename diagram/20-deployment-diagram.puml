@@ -1,0 +1,85 @@
+@startuml Deployment Diagram - Intel Forge
+skinparam backgroundColor white
+skinparam defaultFontSize 11
+skinparam ArrowColor #1565C0
+skinparam ArrowThickness 1
+skinparam node {
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+  FontColor #0D47A1
+}
+skinparam database {
+  BackgroundColor #FFF3E0
+  BorderColor #E65100
+}
+skinparam cloud {
+  BackgroundColor #F5F5F5
+  BorderColor #90A4AE
+}
+
+title <b>Deployment Diagram</b>\nIntel Forge Physical Infrastructure
+
+cloud "Internet" as Internet {
+  actor "Users" as Users
+  actor "Cron Scheduler\n(Vercel/GitHub Actions)" as CronExt
+  actor "Webhook Subscribers\n(SIEM/Slack)" as WebhookSub
+}
+
+node "Application Server" as AppServer {
+  node "Docker Host" as DockerHost {
+    artifact "Next.js 16 App\n(Node.js 20)" as NextApp {
+      component "SSR Pages" as SSR
+      component "API Routes" as APIRoutes
+      component "SSE Endpoint" as SSEEndpoint
+      component "Automation Orchestrator" as AutoOrch
+    }
+  }
+}
+
+node "Database Server" as DBServer {
+  node "Docker: intelforge-postgres" as PGContainer {
+    database "PostgreSQL 16\nport 5432" as PG {
+      storage "Feed cache tables (12)" as FeedTables
+      storage "Automation tables (17)" as AutoTables
+      storage "User/auth tables (15)" as UserTables
+      storage "Materialised views" as MatViews
+    }
+  }
+}
+
+node "Vector DB (optional)" as VectorNode {
+  database "Milvus" as Milvus
+}
+
+node "Object Storage (optional)" as StorageNode {
+  database "MinIO" as MinIO
+}
+
+' Connections
+Users --> NextApp : HTTPS
+CronExt --> APIRoutes : POST /api/cron/*\n(Bearer CRON_SECRET)
+AutoOrch --> WebhookSub : HTTPS webhook\n(HMAC signed)
+
+NextApp --> PG : TCP 5432\n(pg Pool, max 50)
+NextApp --> Milvus : gRPC 19530
+NextApp --> MinIO : HTTP 9000
+
+SSEEndpoint --> PG : LISTEN/NOTIFY\n(dedicated connection)
+
+note right of PGContainer
+  <b>Environment Variables:</b>
+  DATABASE_URL
+  JWT_SECRET
+  JWT_REFRESH_SECRET
+  SESSION_SECRET
+  CRON_SECRET
+  RESPONSE_SIGNING_SECRET
+end note
+
+note bottom of NextApp
+  <b>Dev:</b> npm run dev (--webpack)
+  <b>Prod:</b> npm run build && npm start -p 80
+  <b>Rate limit:</b> 10 cron calls/min/IP
+end note
+
+@enduml

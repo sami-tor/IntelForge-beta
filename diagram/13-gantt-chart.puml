@@ -1,0 +1,52 @@
+@startgantt
+skinparam backgroundColor white
+skinparam defaultFontSize 11
+title Gantt Chart - Intel Forge Project Timeline (20 Weeks)
+
+Project starts 2025-01-01
+
+-- Phase 1: Requirements & Design --
+[Requirements Gathering] lasts 2 weeks
+[System Architecture Design] lasts 1 week
+[Database Design] lasts 1 week
+[UI/UX Design] lasts 1 week
+
+-- Phase 2: Development --
+[Authentication System] lasts 2 weeks
+[Text Search Functionality] lasts 2 weeks
+[Face Search Integration] lasts 2 weeks
+[Data Scraping & Indexing] lasts 2 weeks
+[Admin Panel] lasts 2 weeks
+
+-- Phase 3: Integration & Testing --
+[Integration Testing] lasts 2 weeks
+[Security Testing] lasts 1 week
+[Performance Testing] lasts 1 week
+[User Acceptance Testing] lasts 1 week
+
+-- Phase 4: Documentation & Deployment --
+[System Documentation] lasts 1 week
+[Re-Engineering Analysis] lasts 2 weeks
+[Report Writing] lasts 1 week
+[System Deployment] lasts 1 week
+
+[Requirements Gathering] -> [System Architecture Design]
+[System Architecture Design] -> [Database Design]
+[Database Design] -> [UI/UX Design]
+[UI/UX Design] -> [Authentication System]
+[Authentication System] -> [Text Search Functionality]
+[Text Search Functionality] -> [Face Search Integration]
+[Face Search Integration] -> [Data Scraping & Indexing]
+[Data Scraping & Indexing] -> [Admin Panel]
+[Admin Panel] -> [Integration Testing]
+[Integration Testing] -> [Security Testing]
+[Security Testing] -> [Performance Testing]
+[Performance Testing] -> [User Acceptance Testing]
+[User Acceptance Testing] -> [System Documentation]
+[System Documentation] -> [Re-Engineering Analysis]
+[Re-Engineering Analysis] -> [Report Writing]
+[Report Writing] -> [System Deployment]
+
+@endgantt
+
+

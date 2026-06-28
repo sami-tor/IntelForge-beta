@@ -1,0 +1,12 @@
+# Telegram Channel/Group IDs to monitor
+# One ID per line
+# Format: -1001234567890 (negative for channels/groups)
+
+# Default channel
+-1003205692912
+
+# Add more channel/group IDs below:
+# -1001234567890
+# -1009876543210
+
+

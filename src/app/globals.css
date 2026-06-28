@@ -1,0 +1,401 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* Base theme */
+  --background: oklch(0.98 0 0);
+  --foreground: oklch(0.2 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.2 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.2 0 0);
+  /* Primary: Professional Red (Hue 25) */
+  --primary: oklch(0.55 0.22 25);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.5 0.18 25);
+  --secondary-foreground: oklch(1 0 0);
+  --muted: oklch(0.95 0 0);
+  --muted-foreground: oklch(0.5 0 0);
+  --accent: oklch(0.58 0.2 25);
+  --accent-foreground: oklch(1 0 0);
+  --destructive: oklch(0.6 0.22 25);
+  --destructive-foreground: oklch(1 0 0);
+  --border: oklch(0.9 0 0);
+  --input: oklch(0.96 0 0);
+  --ring: oklch(0.55 0.22 25);
+  --chart-1: oklch(0.55 0.22 25);
+  --chart-2: oklch(0.6 0.2 15);
+  --chart-3: oklch(0.65 0.18 35);
+  --chart-4: oklch(0.5 0.2 20);
+  --chart-5: oklch(0.58 0.19 30);
+  --radius: 0.5rem;
+
+  /* Severity semantic tokens — consistent across all intel pages */
+  /* Critical (ransomware, active exploitation, data breach) */
+  --sev-critical: oklch(0.58 0.22 25);
+  --sev-critical-bg: oklch(0.58 0.22 25 / 0.12);
+  --sev-critical-border: oklch(0.58 0.22 25 / 0.3);
+  /* High (active threats, high CVEs, APT activity) */
+  --sev-high: oklch(0.65 0.2 50);
+  --sev-high-bg: oklch(0.65 0.2 50 / 0.12);
+  --sev-high-border: oklch(0.65 0.2 50 / 0.3);
+  /* Medium (moderate risk, informational) */
+  --sev-medium: oklch(0.72 0.18 85);
+  --sev-medium-bg: oklch(0.72 0.18 85 / 0.1);
+  --sev-medium-border: oklch(0.72 0.18 85 / 0.25);
+  /* Low (safe, clean, resolved) */
+  --sev-low: oklch(0.62 0.17 145);
+  --sev-low-bg: oklch(0.62 0.17 145 / 0.1);
+  --sev-low-border: oklch(0.62 0.17 145 / 0.25);
+  /* Info (news, advisories, general guidance) */
+  --sev-info: oklch(0.55 0.17 250);
+  --sev-info-bg: oklch(0.55 0.17 250 / 0.1);
+  --sev-info-border: oklch(0.55 0.17 250 / 0.25);
+
+  /* Search mode tokens — distinct but cohesive */
+  /* Text search = primary red */
+  --mode-text: oklch(0.6 0.22 25);
+  --mode-text-bg: oklch(0.6 0.22 25 / 0.15);
+  /* Face search = deep purple (secondary to primary) */
+  --mode-face: oklch(0.5 0.16 280);
+  --mode-face-bg: oklch(0.5 0.16 280 / 0.15);
+  /* Image search = teal/cyan (accent variant) */
+  --mode-image: oklch(0.6 0.18 200);
+  --mode-image-bg: oklch(0.6 0.18 200 / 0.15);
+}
+
+.dark {
+  /* Dark background with red mesh gradient */
+  --background: oklch(0.12 0.02 25 / 0.95);
+  --foreground: oklch(0.95 0 0);
+  --card: oklch(0.15 0.02 25 / 0.9);
+  --card-foreground: oklch(0.95 0 0);
+  --popover: oklch(0.15 0.02 25 / 0.95);
+  --popover-foreground: oklch(0.95 0 0);
+  /* Red primary */
+  --primary: oklch(0.6 0.22 25);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.52 0.18 25);
+  --secondary-foreground: oklch(1 0 0);
+  --muted: oklch(0.2 0.02 25 / 0.8);
+  --muted-foreground: oklch(0.6 0 0);
+  --accent: oklch(0.62 0.22 25);
+  --accent-foreground: oklch(1 0 0);
+  --destructive: oklch(0.6 0.22 25);
+  --destructive-foreground: oklch(1 0 0);
+  --border: oklch(0.25 0.02 25 / 0.5);
+  --input: oklch(0.18 0.02 25 / 0.8);
+  --ring: oklch(0.6 0.22 25);
+  --chart-1: oklch(0.6 0.22 25);
+  --chart-2: oklch(0.62 0.2 50);
+  --chart-3: oklch(0.65 0.18 85);
+  --chart-4: oklch(0.55 0.18 280);
+  --chart-5: oklch(0.6 0.17 200);
+
+  /* Severity tokens (dark mode — slightly more saturated) */
+  --sev-critical: oklch(0.65 0.22 25);
+  --sev-critical-bg: oklch(0.65 0.22 25 / 0.2);
+  --sev-critical-border: oklch(0.65 0.22 25 / 0.4);
+  --sev-high: oklch(0.7 0.2 50);
+  --sev-high-bg: oklch(0.7 0.2 50 / 0.2);
+  --sev-high-border: oklch(0.7 0.2 50 / 0.4);
+  --sev-medium: oklch(0.75 0.18 85);
+  --sev-medium-bg: oklch(0.75 0.18 85 / 0.18);
+  --sev-medium-border: oklch(0.75 0.18 85 / 0.35);
+  --sev-low: oklch(0.68 0.17 145);
+  --sev-low-bg: oklch(0.68 0.17 145 / 0.15);
+  --sev-low-border: oklch(0.68 0.17 145 / 0.3);
+  --sev-info: oklch(0.6 0.17 250);
+  --sev-info-bg: oklch(0.6 0.17 250 / 0.15);
+  --sev-info-border: oklch(0.6 0.17 250 / 0.3);
+
+  /* Search mode tokens (dark mode) */
+  --mode-text: oklch(0.62 0.22 25);
+  --mode-text-bg: oklch(0.62 0.22 25 / 0.2);
+  --mode-face: oklch(0.55 0.16 280);
+  --mode-face-bg: oklch(0.55 0.16 280 / 0.2);
+  --mode-image: oklch(0.62 0.18 200);
+  --mode-image-bg: oklch(0.62 0.18 200 / 0.2);
+}
+
+@theme inline {
+  /* Oxanium font from Adobe Typekit */
+  --font-sans: "oxanium", sans-serif;
+  --font-mono: "Courier New", monospace;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply text-foreground font-sans antialiased;
+    font-family: "oxanium", sans-serif;
+    font-weight: 600;
+    font-style: normal;
+    background: 
+      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(239, 68, 68, 0.15), transparent),
+      radial-gradient(ellipse 60% 50% at 0% 100%, rgba(239, 68, 68, 0.1), transparent),
+      radial-gradient(ellipse 60% 50% at 100% 100%, rgba(239, 68, 68, 0.1), transparent),
+      linear-gradient(180deg, #0a0a0a 0%, #050505 50%, #0a0a0a 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
+    position: relative;
+  }
+  
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+      radial-gradient(circle at 20% 50%, rgba(239, 68, 68, 0.03) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(239, 68, 68, 0.03) 0%, transparent 50%),
+      radial-gradient(circle at 40% 20%, rgba(239, 68, 68, 0.02) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  
+  body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+      repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, 0.03) 2px, rgba(0, 0, 0, 0.03) 4px);
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+
+  /* particles.js may append a canvas; keep it from ever intercepting clicks */
+  #particles-js,
+  #particles-js canvas {
+    pointer-events: none !important;
+  }
+  
+  /* Ensure content is above background layers */
+  main, section, div[class*="container"] {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+@keyframes countUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Adding advanced button animations */
+@keyframes buttonPulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes buttonShine {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+@keyframes buttonGlow {
+  0%,
+  100% {
+    box-shadow: 0 0 5px oklch(0.6 0.22 25 / 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px oklch(0.6 0.22 25 / 0.6), 0 0 30px oklch(0.6 0.22 25 / 0.4);
+  }
+}
+
+@keyframes buttonSlideUp {
+  from {
+    transform: translateY(2px);
+  }
+  to {
+    transform: translateY(-2px);
+  }
+}
+
+.animate-count-up {
+  animation: countUp 0.6s ease-out;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out;
+}
+
+/* Button animation utility classes */
+.btn-animate {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-animate:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px oklch(0.6 0.22 25 / 0.3), 0 8px 10px -6px oklch(0.6 0.22 25 / 0.2);
+}
+
+.btn-animate:active {
+  transform: translateY(0);
+  box-shadow: 0 5px 15px -3px oklch(0.6 0.22 25 / 0.2);
+}
+
+.btn-animate::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, oklch(1 0 0 / 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.btn-animate:hover::before {
+  left: 100%;
+}
+
+.btn-glow {
+  transition: all 0.3s ease;
+}
+
+.btn-glow:hover {
+  animation: buttonGlow 2s ease-in-out infinite;
+}
+
+.btn-scale {
+  transition: transform 0.2s ease;
+}
+
+.btn-scale:hover {
+  transform: scale(1.05);
+}
+
+.btn-scale:active {
+  transform: scale(0.98);
+}
+
+.btn-slide {
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.btn-slide::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: currentColor;
+  transition: all 0.3s ease;
+  transform: translateX(-50%);
+}
+
+.btn-slide:hover::after {
+  width: 80%;
+}
+
+.btn-ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-ripple::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: oklch(1 0 0 / 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.btn-ripple:active::after {
+  width: 300px;
+  height: 300px;
+}
+
+/* ---- particles.js ---- */
+#particles-js {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  z-index: -1;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+
+/* particles.js injects canvas; ensure it never steals clicks from nav/sidebars */
+#particles-js canvas {
+  pointer-events: none !important;
+}
+
+canvas {
+  display: block;
+  vertical-align: bottom;
+}

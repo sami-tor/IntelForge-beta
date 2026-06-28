@@ -1,0 +1,366 @@
+@startuml Class Diagram - Intel Forge
+skinparam backgroundColor white
+skinparam linetype polyline
+skinparam ArrowColor #1565C0
+skinparam ArrowThickness 1
+skinparam defaultFontSize 11
+skinparam classAttributeIconSize 0
+skinparam class {
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+  FontColor #0D47A1
+  AttributeFontSize 9
+}
+skinparam package {
+  BackgroundColor #F5F5F5
+  BorderColor #90A4AE
+}
+
+title Class Diagram - Intel Forge System Architecture
+
+package "Frontend (Next.js)" {
+  class NextJSApp {
+    - pages: Page[]
+    - components: Component[]
+    + render()
+    + handleRoute()
+  }
+  
+  class AuthContext {
+    - user: User
+    - session: Session
+    + login()
+    + logout()
+    + getCurrentUser()
+  }
+  
+  class SearchPage {
+    - query: string
+    - results: Result[]
+    + searchFace()
+    + searchText()
+    + displayResults()
+  }
+  
+  class AdminPanel {
+    - users: User[]
+    - stats: Statistics
+    + manageUsers()
+    + viewStats()
+    + manageSubscriptions()
+  }
+}
+
+package "Backend API (Next.js)" {
+  class FaceSearchAPI {
+    - faceEmbedder: FaceEmbedder
+    + searchFace(image: File): Result[]
+    + validateImage()
+    + enrichResults()
+  }
+  
+  class TextSearchAPI {
+    - searchEngine: SearchEngine
+    + searchText(query: string): Result[]
+    + filterResults()
+  }
+  
+  class AuthAPI {
+    - db: Database
+    + login(email, password): Session
+    + register(userData): User
+    + verify2FA()
+  }
+  
+  class AdminAPI {
+    - db: Database
+    + getUsers(): User[]
+    + updateUser()
+    + getStats(): Statistics
+  }
+}
+
+package "Image Indexer Service" {
+  class ImageIndexer {
+    - siglipEmbedder: SigLIPEmbedder
+    - dinoEmbedder: DINOv2Embedder
+    - faceEmbedder: FaceEmbedder
+    + processImage(path: string): ImageData
+    + indexToMilvus()
+    + indexToQuickwit()
+  }
+  
+  class ArcFaceEmbedder {
+    - faceAnalyzer: FaceAnalysis
+    - modelName: string
+    + detectAndEmbed(image): Embedding[]
+    + isAvailable(): boolean
+  }
+  
+  class UniFaceEmbedder {
+    - detector: RetinaFace
+    - recognizer: ArcFace
+    + detectAndEmbed(image): Embedding[]
+    + isAvailable(): boolean
+  }
+  
+  class HybridFaceEmbedder {
+    - arcface: ArcFaceEmbedder
+    - uniface: UniFaceEmbedder
+    - useEnsemble: boolean
+    + detectAndEmbed(image): Embedding[]
+    + combineEmbeddings()
+  }
+  
+  class SearchPipeline {
+    - faceEmbedder: FaceEmbedder
+    - milvusClient: MilvusClient
+    + searchFacesByImage(image): Result[]
+    + searchFacesByEmbedding(embedding): Result[]
+  }
+}
+
+package "Threads Scraper Service" {
+  class ThreadsProfileIndexer {
+    - faceEmbedder: FaceEmbedder
+    - milvusClient: MilvusClient
+    - minioClient: MinIOClient
+    + scrapeProfile(username: string): Profile
+    + indexFaces(images: Image[]): void
+    + uploadToMinIO(image): URL
+  }
+}
+
+package "Automation Services" {
+  class AutoScraper {
+    - telegramScraper: TelegramScraper
+    - webScraper: WebScraper
+    - darkWebCrawler: DarkWebCrawler
+    - scheduler: Scheduler
+    + startScraping()
+    + stopScraping()
+    + scheduleScrape()
+  }
+  
+  class TelegramScraper {
+    - client: TelegramClient
+    - chatIds: int[]
+    - mtProxy: MTProxy
+    + monitorChannels()
+    + processMessage()
+    + extractFiles()
+  }
+  
+  class WebScraper {
+    - session: Session
+    - userAgent: string
+    + crawlWebsite(url: string)
+    + extractContent()
+    + saveToData()
+  }
+  
+  class DarkWebCrawler {
+    - torProxy: TorProxy
+    - stemController: Controller
+    + accessOnionSite(url: string)
+    + crawlForums()
+    + extractData()
+  }
+  
+  class FileWatcher {
+    - observer: Observer
+    - dataDirectory: string
+    - indexedFiles: Set<string>
+    + watchDirectory()
+    + onFileCreated()
+    + checkIfIndexed()
+  }
+  
+  class AutoIndexer {
+    - fileWatcher: FileWatcher
+    - documentParser: DocumentParser
+    - ocrService: OCRService
+    - faceProcessor: FaceProcessor
+    + processFile(path: string)
+    + extractText()
+    + extractFaces()
+    + indexToQuickwit()
+    + indexToMilvus()
+  }
+  
+  class DocumentParser {
+    - pdfParser: PDFParser
+    - docxParser: DOCXParser
+    - xlsxParser: XLSXParser
+    + parsePDF(path: string): string
+    + parseDOCX(path: string): string
+    + parseXLSX(path: string): string
+  }
+  
+  class OCRService {
+    - tesseract: Tesseract
+    + extractText(image: Image): string
+    + processBatch(images: Image[]): string[]
+  }
+  
+  class ArchiveExtractor {
+    - zipExtractor: ZIPExtractor
+    - rarExtractor: RARExtractor
+    - sevenZExtractor: SevenZExtractor
+    + extract(path: string): string[]
+    + isArchive(path: string): boolean
+  }
+  
+  class ThreatMonitor {
+    - quickwitClient: QuickwitClient
+    - milvusClient: MilvusClient
+    - alertSystem: AlertSystem
+    + monitorBrandMentions()
+    + detectThreats()
+    + generateAlerts()
+  }
+  
+  class AlertSystem {
+    - smtpClient: SMTPClient
+    + sendEmailAlert()
+    + sendSMSAlert()
+    + sendDashboardNotification()
+  }
+  
+  class Scheduler {
+    - tasks: Task[]
+    + scheduleTask(task: Task, interval: int)
+    + runScheduledTasks()
+    + stopScheduler()
+  }
+}
+
+package "Data Storage" {
+  class PostgreSQL {
+    + users: Table
+    + sessions: Table
+    + searchIndex: Table
+    + apiKeys: Table
+    + query(sql: string): Result
+  }
+  
+  class Milvus {
+    + imagesCollection: Collection
+    + facesCollection: Collection
+    + search(embedding, limit): Result[]
+    + insert(data): void
+  }
+  
+  class MinIO {
+    + buckets: Bucket[]
+    + uploadFile(file, path): URL
+    + getFile(path): File
+  }
+  
+  class Quickwit {
+    + indexes: Index[]
+    + indexDocument(doc): void
+    + search(query): Result[]
+  }
+}
+
+package "Database Models" {
+  class User {
+    + id: int
+    + email: string
+    + username: string
+    + role: string
+    + subscriptionType: string
+    + searchCount: int
+    + searchLimit: int
+  }
+  
+  class Session {
+    + id: int
+    + userId: int
+    + sessionToken: string
+    + expiresAt: timestamp
+    + ipAddress: string
+  }
+  
+  class SearchIndex {
+    + id: int
+    + filePath: string
+    + fileName: string
+    + fileType: string
+    + indexedAt: timestamp
+  }
+  
+  class APIKey {
+    + id: int
+    + userId: int
+    + keyHash: string
+    + permissions: string[]
+    + createdAt: timestamp
+  }
+}
+
+' Relationships
+NextJSApp --> AuthContext
+NextJSApp --> SearchPage
+NextJSApp --> AdminPanel
+
+SearchPage --> FaceSearchAPI
+SearchPage --> TextSearchAPI
+AdminPanel --> AdminAPI
+
+FaceSearchAPI --> SearchPipeline
+FaceSearchAPI --> PostgreSQL
+TextSearchAPI --> Quickwit
+AuthAPI --> PostgreSQL
+AdminAPI --> PostgreSQL
+
+ImageIndexer --> ArcFaceEmbedder
+ImageIndexer --> UniFaceEmbedder
+ImageIndexer --> HybridFaceEmbedder
+ImageIndexer --> Milvus
+ImageIndexer --> MinIO
+ImageIndexer --> Quickwit
+
+HybridFaceEmbedder --> ArcFaceEmbedder
+HybridFaceEmbedder --> UniFaceEmbedder
+
+SearchPipeline --> HybridFaceEmbedder
+SearchPipeline --> Milvus
+
+ThreadsProfileIndexer --> HybridFaceEmbedder
+ThreadsProfileIndexer --> Milvus
+ThreadsProfileIndexer --> MinIO
+
+AutoScraper --> TelegramScraper
+AutoScraper --> WebScraper
+AutoScraper --> DarkWebCrawler
+AutoScraper --> Scheduler
+
+FileWatcher --> AutoIndexer
+AutoIndexer --> DocumentParser
+AutoIndexer --> OCRService
+AutoIndexer --> FaceProcessor
+AutoIndexer --> ArchiveExtractor
+AutoIndexer --> Quickwit
+AutoIndexer --> Milvus
+AutoIndexer --> MinIO
+
+ThreatMonitor --> Quickwit
+ThreatMonitor --> Milvus
+ThreatMonitor --> AlertSystem
+AlertSystem --> SMTP
+
+Scheduler --> AutoScraper
+Scheduler --> ThreatMonitor
+
+PostgreSQL --> User
+PostgreSQL --> Session
+PostgreSQL --> SearchIndex
+PostgreSQL --> APIKey
+
+@enduml
+
+
+
+

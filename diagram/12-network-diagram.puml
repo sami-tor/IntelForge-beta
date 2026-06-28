@@ -1,0 +1,105 @@
+@startuml Network Architecture Diagram
+skinparam backgroundColor white
+skinparam ArrowColor #1565C0
+skinparam ArrowThickness 1
+skinparam defaultFontSize 11
+skinparam linetype ortho
+
+title Network Architecture - Intel Forge OSINT Platform
+
+cloud "Internet" {
+}
+
+node "Load Balancer" as LB {
+}
+
+node "Application Servers" {
+  component "Next.js Server 1" as App1
+  component "Next.js Server 2" as App2
+  component "Next.js Server 3" as App3
+}
+
+node "Database Cluster" {
+  database "PostgreSQL Primary" as PG1
+  database "PostgreSQL Replica" as PG2
+}
+
+node "Search Cluster" {
+  component "Quickwit Node 1" as QW1
+  component "Quickwit Node 2" as QW2
+  component "Quickwit Node 3" as QW3
+}
+
+node "Vector Database" {
+  database "Milvus Cluster" as Milvus
+}
+
+node "Object Storage" {
+  component "MinIO Cluster" as MinIO
+}
+
+node "Automation Services" {
+  component "Telegram Scraper" as Telegram
+  component "Web Scraper" as WebScraper
+  component "Dark Web Crawler" as DarkWeb
+  component "Auto Indexer" as AutoIndexer
+  component "Threat Monitor" as ThreatMon
+}
+
+node "ML Services" {
+  component "Face Recognition" as FaceRec
+  component "OCR Service" as OCR
+}
+
+node "External Services" {
+  component "SMTP Server" as SMTP
+  component "OAuth Providers" as OAuth
+}
+
+Internet --> LB
+LB --> App1
+LB --> App2
+LB --> App3
+
+App1 --> PG1
+App2 --> PG1
+App3 --> PG1
+PG1 --> PG2
+
+App1 --> QW1
+App2 --> QW2
+App3 --> QW3
+QW1 --> QW2
+QW2 --> QW3
+
+App1 --> Milvus
+App2 --> Milvus
+App3 --> Milvus
+
+App1 --> MinIO
+App2 --> MinIO
+App3 --> MinIO
+
+Telegram --> MinIO
+WebScraper --> MinIO
+DarkWeb --> MinIO
+AutoIndexer --> MinIO
+AutoIndexer --> QW1
+AutoIndexer --> Milvus
+
+ThreatMon --> QW1
+ThreatMon --> Milvus
+ThreatMon --> SMTP
+
+AutoIndexer --> FaceRec
+AutoIndexer --> OCR
+FaceRec --> Milvus
+OCR --> QW1
+
+App1 --> SMTP
+App1 --> OAuth
+
+@enduml
+
+
+

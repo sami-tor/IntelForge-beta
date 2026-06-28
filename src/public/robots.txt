@@ -1,0 +1,21 @@
+User-agent: *
+Allow: /
+Allow: /search
+Allow: /pricing
+Allow: /about
+Allow: /news
+Allow: /help
+Allow: /terms
+Allow: /privacy
+Allow: /acceptable-use
+Allow: /api-docs
+
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /api/
+Disallow: /auth/
+Disallow: /_next/
+Disallow: /data/
+
+Sitemap: https://osintsearch.online/sitemap.xml
+

@@ -1,0 +1,94 @@
+@startuml Activity Diagram - Automated Data Collection & Indexing
+skinparam backgroundColor white
+skinparam linetype polyline
+skinparam ArrowColor #1565C0
+skinparam ArrowThickness 1
+skinparam defaultFontSize 11
+
+title Activity Diagram - Automated Data Collection and Indexing Process
+
+start
+
+:Scheduler triggers scraping cycle;
+
+partition "Data Collection" {
+  fork
+    :Telegram Scraper monitors channels;
+    :Extract messages and files;
+    :Save to /data directory;
+  fork again
+    :Web Scraper crawls surface web;
+    :Extract content and files;
+    :Save to /data directory;
+  fork again
+    :Dark Web Crawler accesses .onion sites;
+    :Extract content securely;
+    :Save to /data directory;
+  end fork
+}
+
+:File Watcher detects new files;
+if (New file detected?) then (no)
+  :Wait for next scan;
+  stop
+endif
+
+:Debounce wait (5 seconds);
+:Check if file already indexed;
+if (Already indexed?) then (yes)
+  :Skip file;
+  stop
+endif
+
+partition "File Processing" {
+  if (Is archive?) then (yes)
+    :Extract archive (ZIP/RAR/7Z);
+    :Process extracted files;
+  endif
+  
+  if (Is document?) then (yes)
+    :Parse document (PDF/DOCX/XLSX);
+    :Extract text content;
+  endif
+  
+  if (Is image?) then (yes)
+    :Perform OCR extraction;
+    :Detect faces in image;
+    if (Faces found?) then (yes)
+      :Generate face embeddings;
+      :Index to Milvus;
+    endif
+  endif
+}
+
+partition "Text Indexing" {
+  :Process file line by line;
+  :Extract metadata;
+  :Batch index to Quickwit\n(1000 lines per batch);
+  :Track indexed file;
+}
+
+partition "Storage" {
+  :Store original file in MinIO;
+  :Store metadata in PostgreSQL;
+  :Update search index;
+}
+
+partition "Threat Monitoring" {
+  :Monitor for brand mentions;
+  :Detect threats and vulnerabilities;
+  if (Threat detected?) then (yes)
+    :Generate alert;
+    :Send notification;
+  endif
+}
+
+:Mark file as indexed;
+:Continue monitoring;
+
+stop
+
+@enduml
+
+
+

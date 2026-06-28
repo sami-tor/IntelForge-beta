@@ -1,0 +1,115 @@
+@startuml Component Diagram - Intel Forge
+skinparam backgroundColor white
+skinparam defaultFontSize 11
+skinparam linetype polyline
+skinparam ArrowColor #1565C0
+skinparam ArrowThickness 1
+skinparam component {
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+  FontColor #0D47A1
+}
+skinparam interface {
+  BackgroundColor #BBDEFB
+  BorderColor #1565C0
+}
+skinparam package {
+  BackgroundColor #F5F5F5
+  BorderColor #90A4AE
+}
+
+title <b>Component Diagram</b>\nIntel Forge Platform Components & Interfaces
+
+package "Frontend" {
+  [Intelligence Hub UI] as IntelUI
+  [Command Center UI] as CmdUI
+  [Action Queue UI] as ActionUI
+  [Hunt Builder UI] as HuntUI
+  [Admin Panel UI] as AdminUI
+}
+
+package "API Gateway" {
+  [Auth Middleware\n(JWT + CSRF + Rate-limit)] as AuthMW
+  [API Router\n(Next.js App Router)] as Router
+}
+
+package "Intelligence Services" {
+  [Feed Sync Service\n(13 fetchers)] as FeedSync
+  [IOC Lookup Service] as IOCService
+  [Face Search Service] as FaceService
+  [Text Search Service] as TextService
+}
+
+package "Automation Engine" {
+  [Orchestrator\n(10 stages)] as Orchestrator
+  [Threat Score Engine] as ScoreEngine
+  [Deep Correlator v2\n(3 anchors, 11 signals)] as Correlator
+  [Forecast Engine\n(Holt + HW + Naive)] as ForecastEngine
+  [Action Generator] as ActionGen
+  [Briefing Generator\n(+ optional LLM)] as BriefGen
+  [Notification Dispatcher] as Notifier
+  [Geo/Sector Indexer] as GeoIndexer
+}
+
+package "Data Stores" {
+  database "PostgreSQL 16\n(35+ tables)" as PG
+  database "Milvus\n(vector search)" as Milvus
+  database "MinIO\n(object storage)" as MinIO
+}
+
+' Interfaces
+interface "REST API" as IREST
+interface "SSE Stream" as ISSE
+interface "Webhook" as IHOOK
+interface "PDF Export" as IPDF
+interface "Cron Trigger" as ICRON
+
+' Frontend → API
+IntelUI --> IREST
+CmdUI --> IREST
+CmdUI --> ISSE
+ActionUI --> IREST
+HuntUI --> IREST
+AdminUI --> IREST
+
+IREST --> Router
+ISSE --> Router
+Router --> AuthMW
+
+' API → Services
+AuthMW --> FeedSync
+AuthMW --> IOCService
+AuthMW --> FaceService
+AuthMW --> TextService
+AuthMW --> Orchestrator
+
+' Cron → Orchestrator
+ICRON --> Orchestrator
+
+' Orchestrator → Stages
+Orchestrator --> ScoreEngine
+Orchestrator --> Correlator
+Orchestrator --> ForecastEngine
+Orchestrator --> ActionGen
+Orchestrator --> BriefGen
+Orchestrator --> GeoIndexer
+Orchestrator --> Notifier
+
+' Outputs
+BriefGen --> IPDF
+Notifier --> IHOOK
+
+' Data access
+ScoreEngine --> PG
+Correlator --> PG
+ForecastEngine --> PG
+ActionGen --> PG
+BriefGen --> PG
+GeoIndexer --> PG
+FeedSync --> PG
+IOCService --> PG
+TextService --> PG
+FaceService --> Milvus
+FaceService --> MinIO
+
+@enduml

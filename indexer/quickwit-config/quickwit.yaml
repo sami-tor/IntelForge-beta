@@ -1,0 +1,19 @@
+# Quickwit Node Configuration
+version: 0.6
+
+node_id: node-1
+
+default_index_root_uri: file:///quickwit/data/indexes
+
+data_dir: /quickwit/data
+
+metastore_uri: file:///quickwit/data/metastore
+
+listen_address: 0.0.0.0
+advertise_address: 0.0.0.0
+
+rest:
+  listen_port: 7280
+
+grpc_listen_port: 7281
+

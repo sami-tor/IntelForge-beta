@@ -1,0 +1,114 @@
+@startuml Sequence Diagram - Automated Data Collection and Indexing
+skinparam backgroundColor white
+skinparam linetype polyline
+skinparam ArrowColor #1565C0
+skinparam ArrowThickness 1
+skinparam defaultFontSize 11
+
+title Sequence Diagram - Automated Data Collection and Indexing Flow
+
+participant "Scheduler" as Scheduler
+participant "Telegram Scraper" as Telegram
+participant "Web Scraper" as WebScraper
+participant "Dark Web Crawler" as DarkWeb
+participant "File Watcher" as FileWatcher
+participant "Auto Indexer" as Indexer
+participant "Document Parser" as Parser
+participant "OCR Service" as OCR
+participant "Face Processor" as FaceProc
+participant "Quickwit" as Quickwit
+participant "Milvus" as Milvus
+participant "MinIO" as MinIO
+participant "Threat Monitor" as ThreatMon
+participant "Alert System" as Alert
+
+== Automated Scraping Cycle ==
+Scheduler -> Telegram: Trigger scrape cycle
+activate Telegram
+Telegram -> Telegram: Monitor channels
+Telegram -> MinIO: Save messages/files
+deactivate Telegram
+
+Scheduler -> WebScraper: Trigger scrape cycle
+activate WebScraper
+WebScraper -> WebScraper: Crawl websites
+WebScraper -> MinIO: Save content
+deactivate WebScraper
+
+Scheduler -> DarkWeb: Trigger scrape cycle
+activate DarkWeb
+DarkWeb -> DarkWeb: Access .onion sites
+DarkWeb -> MinIO: Save content
+deactivate DarkWeb
+
+== File Detection and Indexing ==
+MinIO -> FileWatcher: New file created
+activate FileWatcher
+FileWatcher -> FileWatcher: Wait 5 seconds (debounce)
+FileWatcher -> Indexer: Notify new file
+deactivate FileWatcher
+
+activate Indexer
+Indexer -> Indexer: Check if already indexed
+alt File not indexed
+  Indexer -> Indexer: Determine file type
+  
+  alt Is document
+    Indexer -> Parser: Parse document
+    activate Parser
+    Parser -> Parser: Extract text (PDF/DOCX/XLSX)
+    Parser --> Indexer: Extracted text
+    deactivate Parser
+  end
+  
+  alt Is image
+    Indexer -> OCR: Extract text from image
+    activate OCR
+    OCR --> Indexer: OCR text
+    deactivate OCR
+    
+    Indexer -> FaceProc: Process image for faces
+    activate FaceProc
+    FaceProc -> FaceProc: Detect faces
+    FaceProc -> FaceProc: Generate embeddings
+    FaceProc -> Milvus: Index face embeddings
+    activate Milvus
+    Milvus --> FaceProc: Indexed
+    deactivate Milvus
+    FaceProc --> Indexer: Face data
+    deactivate FaceProc
+  end
+  
+  Indexer -> Quickwit: Index text content
+  activate Quickwit
+  Quickwit --> Indexer: Indexed
+  deactivate Quickwit
+  
+  Indexer -> MinIO: Store metadata
+  Indexer -> Indexer: Mark as indexed
+end
+deactivate Indexer
+
+== Threat Monitoring ==
+ThreatMon -> Quickwit: Search for threats
+activate Quickwit
+Quickwit --> ThreatMon: Threat results
+deactivate Quickwit
+
+ThreatMon -> Milvus: Search for brand violations
+activate Milvus
+Milvus --> ThreatMon: Brand results
+deactivate Milvus
+
+alt Threat detected
+  ThreatMon -> Alert: Send alert
+  activate Alert
+  Alert -> Alert: Generate notification
+  Alert -> Alert: Send email/SMS
+  deactivate Alert
+end
+
+@enduml
+
+
+

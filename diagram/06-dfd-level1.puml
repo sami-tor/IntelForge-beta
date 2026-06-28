@@ -1,0 +1,52 @@
+@startuml DFD Level 1 - Face Search Process
+skinparam backgroundColor white
+skinparam ArrowColor #1565C0
+skinparam ArrowThickness 1
+skinparam defaultFontSize 11
+skinparam linetype ortho
+
+title Level 1 DFD - Face Search Process
+
+actor "User" as User
+
+rectangle "Face Search System" {
+  component "1.0\nReceive Request" as P1
+  component "2.0\nValidate & Authenticate" as P2
+  component "3.0\nCheck Quota" as P3
+  component "4.0\nDetect Face" as P4
+  component "5.0\nGenerate Embedding" as P5
+  component "6.0\nSearch Milvus" as P6
+  component "7.0\nEnrich Results" as P7
+  component "8.0\nReturn Results" as P8
+  component "9.0\nUpdate Quota & Log" as P9
+}
+
+database "PostgreSQL" as DB
+database "Milvus" as Milvus
+database "MinIO" as MinIO
+
+User --> P1 : Upload image
+P1 --> P2 : Image file + session
+P2 --> DB : Validate session
+DB --> P2 : Session valid
+P2 --> P3 : Authenticated
+P3 --> DB : Check quota
+DB --> P3 : Quota available
+P3 --> P4 : Proceed
+P4 --> P5 : Face detected
+P5 --> P6 : Face embedding
+P6 --> Milvus : Query similar faces
+Milvus --> P6 : Similar face IDs + scores
+P6 --> P7 : Face results
+P7 --> MinIO : Get image URLs
+MinIO --> P7 : Image URLs + metadata
+P7 --> P8 : Enriched results
+P8 --> User : Display results
+P8 --> P9 : Search completed
+P9 --> DB : Update search_count
+P9 --> DB : Log search history
+
+@enduml
+
+
+

@@ -1,0 +1,17 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Hexagon base with subtle fill -->
+  <path d="M32 4 L56 18 L56 46 L32 60 L8 46 L8 18 Z" fill="#ef4444" fill-opacity="0.12"/>
+  <!-- Hexagon border -->
+  <path d="M32 8 L52 20 L52 44 L32 56 L12 44 L12 20 Z" stroke="#ef4444" stroke-width="2" fill="none" stroke-linejoin="round"/>
+  <!-- "IF" monogram -->
+  <text x="32" y="40" text-anchor="middle" font-family="sans-serif" font-weight="700" font-size="20" fill="#ef4444">IF</text>
+  <!-- Circuit node at top -->
+  <circle cx="32" cy="8" r="3" fill="#ef4444"/>
+  <!-- Circuit node at bottom -->
+  <circle cx="32" cy="56" r="3" fill="#ef4444"/>
+  <!-- Side circuit nodes -->
+  <circle cx="52" cy="20" r="2" fill="#ef4444" opacity="0.6"/>
+  <circle cx="52" cy="44" r="2" fill="#ef4444" opacity="0.6"/>
+  <circle cx="12" cy="20" r="2" fill="#ef4444" opacity="0.6"/>
+  <circle cx="12" cy="44" r="2" fill="#ef4444" opacity="0.6"/>
+</svg>

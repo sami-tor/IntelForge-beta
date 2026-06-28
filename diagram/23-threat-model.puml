@@ -1,0 +1,92 @@
+@startuml Threat Model Diagram - Intel Forge
+skinparam backgroundColor white
+skinparam defaultFontSize 11
+skinparam ArrowColor #1565C0
+skinparam ArrowThickness 1
+skinparam rectangle {
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+}
+skinparam cloud {
+  BackgroundColor #FFEBEE
+  BorderColor #C62828
+}
+skinparam database {
+  BackgroundColor #FFF3E0
+  BorderColor #E65100
+}
+
+title <b>Threat Model Diagram</b>\nIntel Forge Security Boundaries & Mitigations
+
+' Trust boundaries
+rectangle "Trust Boundary: Public Internet" as TB1 #FFCDD2 {
+  actor "Authenticated User" as AuthUser
+  actor "Anonymous User" as AnonUser
+  actor "Attacker" as Attacker
+}
+
+rectangle "Trust Boundary: Application Layer" as TB2 #E8F5E9 {
+  component "Next.js Middleware\n• JWT verification\n• CSRF validation\n• Rate limiting\n• Security headers\n• IP lock policies" as Middleware
+
+  component "API Routes\n• Parameterised SQL\n• Input validation (Zod)\n• Role-based access\n• Response signing" as APILayer
+
+  component "Cron Endpoints\n• Bearer CRON_SECRET\n• Rate limit 10/min/IP\n• 429 + Retry-After" as CronLayer
+}
+
+rectangle "Trust Boundary: Data Layer" as TB3 #FFF9C4 {
+  database "PostgreSQL\n• Connection pool (max 50)\n• Statement timeout 30s\n• No raw SQL exposure\n• Passwords as <REDACTED>" as DB
+
+  database "Milvus\n• Internal network only\n• No public port" as Milvus
+
+  database "MinIO\n• Presigned URLs only\n• No direct public access" as MinIO
+}
+
+rectangle "Trust Boundary: External" as TB4 #F3E5F5 {
+  component "Upstream Feeds\n(NVD, KEV, ExploitDB, ...)\n• Read-only\n• Timeout 15s\n• Failure = stale cache" as Feeds
+
+  component "Webhook Subscribers\n• HMAC-signed payloads\n• 10s timeout\n• Logged to notification_log" as Webhooks
+
+  component "LLM Provider (optional)\n• API key in env only\n• 15s timeout\n• Fallback to deterministic" as LLM
+}
+
+' Legitimate flows
+AuthUser --> Middleware : HTTPS + JWT cookie
+AnonUser --> Middleware : HTTPS (limited access)
+Middleware --> APILayer : validated request
+APILayer --> DB : parameterised queries
+CronLayer --> DB : automation writes
+
+' External
+Feeds --> DB : feed-sync cron writes
+APILayer --> Webhooks : alert dispatch
+APILayer --> LLM : optional briefing rewrite
+
+' Attack vectors (red)
+Attacker -[#C62828]-> Middleware : <color:#C62828>SQL injection attempt\n<b>Mitigated:</b> parameterised queries
+Attacker -[#C62828]-> Middleware : <color:#C62828>CSRF attack\n<b>Mitigated:</b> X-CSRF-Token header
+Attacker -[#C62828]-> CronLayer : <color:#C62828>Leaked CRON_SECRET\n<b>Mitigated:</b> rate limit 10/min
+Attacker -[#C62828]-> Middleware : <color:#C62828>JWT forgery\n<b>Mitigated:</b> DB re-fetch every request
+Attacker -[#C62828]-> Middleware : <color:#C62828>Brute force\n<b>Mitigated:</b> edge rate-limit + IP lock
+
+note bottom of DB
+  <b>Data Classification:</b>
+  • Passwords: NEVER stored raw (<REDACTED:length> only)
+  • Stealer logs: login masked (j****@example.invalid)
+  • Hostnames: masked (DESKTOP-A****Z)
+  • All .invalid TLD for demo data
+  • No upstream source names in UI
+end note
+
+note right of Middleware
+  <b>Security Stack:</b>
+  • lib/middleware.ts (requireAuth, requireAdmin)
+  • lib/edge-jwt.ts (Edge-compatible verify)
+  • lib/csrf.ts (double-submit cookie)
+  • lib/rate-limit-edge.ts
+  • lib/security-headers.ts (CSP, HSTS, X-Frame)
+  • lib/idor-protection.ts
+  • lib/ssrf-protection.ts
+  • lib/validation.ts (input sanitisation)
+end note
+
+@enduml

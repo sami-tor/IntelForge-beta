@@ -1,0 +1,91 @@
+@startuml Sequence Diagram - Automation Pipeline
+skinparam backgroundColor white
+skinparam linetype polyline
+skinparam ArrowColor #1565C0
+skinparam ArrowThickness 1
+skinparam defaultFontSize 11
+skinparam sequence {
+  ArrowColor #1565C0
+  LifeLineBorderColor #1565C0
+  LifeLineBackgroundColor #E3F2FD
+  ParticipantBackgroundColor #E3F2FD
+  ParticipantBorderColor #1565C0
+  ParticipantFontColor #0D47A1
+  BoxBackgroundColor #F5F5F5
+  BoxBorderColor #90A4AE
+  DividerBackgroundColor #ECEFF1
+}
+
+title <b>Sequence Diagram</b>\nAutomation Pipeline Request Flow
+
+actor "Cron Scheduler" as Cron
+participant "API Route\n/api/cron/automation" as API
+participant "Orchestrator\norchestrator.ts" as ORC
+participant "Threat Score\nthreat-score.ts" as SCORE
+participant "Deep Correlator\ncorrelator-v2.ts" as CORR
+participant "Forecast\nforecast.ts" as FCT
+participant "Action Queue\naction-queue.ts" as ACT
+participant "Briefing\nbriefing-generator.ts" as BRIEF
+database "PostgreSQL" as DB
+participant "Webhooks" as HOOK
+
+Cron -> API: POST (Bearer CRON_SECRET)
+API -> API: isAuthorized()
+API -> API: checkCronRateLimit()
+API -> ORC: runFullAutomation()
+ORC -> DB: INSERT automation_runs (running)
+
+== Stage 1: Threat Score ==
+ORC -> SCORE: computeAndPersistThreatScore()
+SCORE -> DB: 10x parallel COUNT(*)
+DB --> SCORE: component values
+SCORE -> SCORE: scoreFromComponents()
+SCORE -> DB: INSERT threat_score_history
+SCORE -> DB: NOTIFY score.updated
+SCORE --> ORC: {score: 49, severity: medium}
+
+== Stage 2: Deep Correlation ==
+ORC -> CORR: runDeepCorrelationPass()
+CORR -> DB: SELECT 80 anchor CVEs
+CORR -> DB: SELECT exploits, news, paste, actors, victims, darknet
+CORR -> CORR: scoreCluster() per anchor (weighted + decay)
+CORR -> DB: UPSERT 176 clusters
+CORR -> DB: NOTIFY cluster.upserted
+CORR --> ORC: {scanned: 176, persisted: 176}
+
+== Stage 3-4: Trends + Forecast ==
+ORC -> FCT: captureTrends() + generateForecasts()
+FCT -> DB: 7 KPI queries + UPSERT trends
+FCT -> FCT: holt() / holtWinters() per metric
+FCT -> DB: UPSERT 49 forecast points
+FCT -> FCT: z-score anomaly check
+FCT -> DB: runForecastBacktest() → MAPE/RMSE/MAE
+FCT --> ORC: {forecasts: 49, anomalies: 0}
+
+== Stage 5-6: Geo + Actions ==
+ORC -> ACT: captureGeoAndSector() + generateActions()
+ACT -> DB: GROUP BY country/sector
+ACT -> DB: UPSERT geo + sector rows
+ACT -> DB: Read top clusters + anomalies
+ACT -> DB: UPSERT 20 action items
+ACT -> DB: NOTIFY action.created
+ACT --> ORC: {actions: 20, countries: 40}
+
+== Stage 7: Briefing ==
+ORC -> BRIEF: generateDailyBriefing()
+BRIEF -> BRIEF: buildHeadline() + buildNarrative()
+BRIEF -> DB: UPSERT intel_briefings
+BRIEF -> DB: NOTIFY briefing.published
+BRIEF --> ORC: {headline: "...", score: 49}
+
+== Stage 8: Notifications ==
+ORC -> HOOK: notifyBriefing() + notifyCriticalClusters()
+HOOK -> DB: INSERT notification_log
+
+ORC -> DB: UPDATE automation_runs (success)
+ORC -> DB: NOTIFY pipeline.complete
+ORC --> API: AutomationRunOutput (all 10 stages)
+API --> Cron: 200 OK + JSON payload
+
+@enduml
+

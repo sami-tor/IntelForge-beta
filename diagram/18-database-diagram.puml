@@ -1,0 +1,429 @@
+@startuml Database Diagram - Intel Forge
+skinparam backgroundColor white
+skinparam ArrowColor #1565C0
+skinparam ArrowThickness 1
+skinparam defaultFontSize 11
+skinparam linetype ortho
+skinparam roundcorner 8
+skinparam shadowing false
+
+title Complete Database Schema Diagram - Intel Forge OSINT Platform
+
+' ============================================
+' USER MANAGEMENT TABLES
+' ============================================
+
+package "User Management" #LightBlue {
+  entity "users" {
+    * **id** : INTEGER <<PK>>
+    --
+    * **email** : VARCHAR(255) <<UNIQUE>>
+    * **password_hash** : VARCHAR(255)
+    * **username** : VARCHAR(100) <<UNIQUE>>
+    * **role** : VARCHAR(20)
+    * **verification_status** : VARCHAR(20)
+    * **subscription_type** : VARCHAR(50)
+    subscription_start : DATE
+    subscription_end : DATE
+    is_lifetime : BOOLEAN
+    is_active : BOOLEAN
+    search_count : INTEGER
+    search_limit : INTEGER
+    created_at : TIMESTAMP
+    last_login : TIMESTAMP
+    --
+    Indexes: email, username, role, subscription_type
+  }
+
+  entity "sessions" {
+    * **id** : INTEGER <<PK>>
+    --
+    * **user_id** : INTEGER <<FK>>
+    * **session_token** : VARCHAR(255) <<UNIQUE>>
+    * **expires_at** : TIMESTAMP
+    ip_address : VARCHAR(45)
+    user_agent : TEXT
+    created_at : TIMESTAMP
+    --
+    Indexes: user_id, session_token, expires_at
+  }
+
+  entity "two_factor_sessions" {
+    * **id** : INTEGER <<PK>>
+    --
+    * **user_id** : INTEGER <<FK>> <<UNIQUE>>
+    * **secret** : VARCHAR(255)
+    backup_codes : TEXT[]
+    is_enabled : BOOLEAN
+    created_at : TIMESTAMP
+  }
+
+  entity "ip_lock_policies" {
+    * **id** : INTEGER <<PK>>
+    --
+    * **user_id** : INTEGER <<FK>> <<UNIQUE>>
+    * **locked_ip** : VARCHAR(45)
+    allow_new_ips : BOOLEAN
+    require_approval : BOOLEAN
+    notify_on_new_ip : BOOLEAN
+    created_at : TIMESTAMP
+    updated_at : TIMESTAMP
+  }
+
+  entity "login_activity" {
+    * **id** : INTEGER <<PK>>
+    --
+    * **user_id** : INTEGER <<FK>>
+    * **ip_address** : VARCHAR(45)
+    user_agent : TEXT
+    * **status** : VARCHAR(20)
+    failure_reason : TEXT
+    * **created_at** : TIMESTAMP
+    --
+    Indexes: user_id, status, created_at
+  }
+
+  entity "login_alerts" {
+    * **id** : INTEGER <<PK>>
+    --
+    * **user_id** : INTEGER <<FK>>
+    * **login_activity_id** : INTEGER <<FK>>
+    * **alert_type** : VARCHAR(50)
+    is_read : BOOLEAN
+    created_at : TIMESTAMP
+  }
+}
+
+' ============================================
+' SUBSCRIPTION MANAGEMENT TABLES
+' ============================================
+
+package "Subscription Management" #LightGreen {
+  entity "subscription_plans" {
+    * **id** : INTEGER <<PK>>
+    --
+    * **name** : VARCHAR(100) <<UNIQUE>>
+    description : TEXT
+    * **price** : DECIMAL(10,2)
+    * **monthly_search_limit** : INTEGER
+    data_sources : TEXT[]
+    support_level : VARCHAR(50)
+    user_limit : INTEGER
+    api_access : BOOLEAN
+    is_active : BOOLEAN
+    sort_order : INTEGER
+    created_at : TIMESTAMP
+  }
+
+  entity "user_subscriptions" {
+    * **id** : INTEGER <<PK>>
+    --
+    * **user_id** : INTEGER <<FK>>
+    * **plan_id** : INTEGER <<FK>>
+    * **start_date** : DATE
+    * **end_date** : DATE
+    is_active : BOOLEAN
+    auto_renew : BOOLEAN
+    created_at : TIMESTAMP
+  }
+
+  entity "user_monthly_quota" {
+    * **id** : INTEGER <<PK>>
+    --
+    * **user_id** : INTEGER <<FK>>
+    * **month** : INTEGER
+    * **year** : INTEGER
+    * **search_count** : INTEGER
+    quota_limit : INTEGER
+    reset_at : TIMESTAMP
+    created_at : TIMESTAMP
+    --
+    Unique: user_id, month, year
+  }
+
+  entity "billing_records" {
+    * **id** : INTEGER <<PK>>
+    --
+    * **user_id** : INTEGER <<FK>>
+    plan_id : INTEGER
+    * **amount** : DECIMAL(10,2)
+    paid_at : TIMESTAMP
+    period_start : TIMESTAMP
+    period_end : TIMESTAMP
+    status : VARCHAR(20)
+    invoice_id : VARCHAR(100) <<UNIQUE>>
+    created_at : TIMESTAMP
+  }
+}
+
+' ============================================
+' SEARCH & INDEXING TABLES
+' ============================================
+
+package "Search & Indexing" #LightYellow {
+  entity "search_index" {
+    * **id** : INTEGER <<PK>>
+    --
+    * **file_path** : VARCHAR(512) <<UNIQUE>>
+    * **file_name** : VARCHAR(255)
+    file_size : BIGINT
+    line_count : INTEGER
+    file_type : TEXT
+    indexed_at : TIMESTAMP
+    created_at : TIMESTAMP
+    --
+    Indexes: file_path, file_type, indexed_at
+  }
+
+  entity "search_index_lines" {
+    * **id** : BIGINT <<PK>>
+    --
+    * **index_id** : INTEGER <<FK>>
+    * **line_number** : INTEGER
+    * **line_content** : TEXT
+    * **search_vector** : TSVECTOR
+    --
+    Indexes: index_id, search_vector (GIN)
+  }
+
+  entity "search_logs" {
+    * **id** : INTEGER <<PK>>
+    --
+    * **user_id** : INTEGER <<FK>>
+    * **query** : TEXT
+    * **result_count** : INTEGER
+    * **search_type** : VARCHAR(50)
+    response_time : INTEGER
+    created_at : TIMESTAMP
+    --
+    Indexes: user_id, search_type, created_at
+  }
+
+  entity "search_history" {
+    * **id** : INTEGER <<PK>>
+    --
+    * **user_id** : INTEGER <<FK>>
+    * **query** : TEXT
+    * **result_count** : INTEGER
+    created_at : TIMESTAMP
+    --
+    Indexes: user_id, created_at
+  }
+
+  entity "search_directories" {
+    * **id** : INTEGER <<PK>>
+    --
+    * **directory_path** : VARCHAR(512) <<UNIQUE>>
+    is_active : BOOLEAN
+    priority : INTEGER
+    created_at : TIMESTAMP
+  }
+}
+
+' ============================================
+' API MANAGEMENT TABLES
+' ============================================
+
+package "API Management" #LightCoral {
+  entity "api_keys" {
+    * **id** : INTEGER <<PK>>
+    --
+    * **user_id** : INTEGER <<FK>>
+    * **key_hash** : VARCHAR(255) <<UNIQUE>>
+    * **name** : VARCHAR(255)
+    permissions : TEXT[]
+    is_active : BOOLEAN
+    last_used : TIMESTAMP
+    created_at : TIMESTAMP
+    --
+    Indexes: user_id, key_hash, is_active
+  }
+
+  entity "api_key_usage" {
+    * **id** : INTEGER <<PK>>
+    --
+    * **api_key_id** : INTEGER <<FK>>
+    * **endpoint** : VARCHAR(255)
+    * **method** : VARCHAR(10)
+    status_code : INTEGER
+    response_time : INTEGER
+    created_at : TIMESTAMP
+    --
+    Indexes: api_key_id, created_at
+  }
+}
+
+' ============================================
+' SECURITY & AUDIT TABLES
+' ============================================
+
+package "Security & Audit" #LightPink {
+  entity "security_logs" {
+    * **id** : INTEGER <<PK>>
+    --
+    event_type : VARCHAR(100)
+    details : JSONB
+    user_id : INTEGER <<FK>>
+    ip_address : VARCHAR(45)
+    created_at : TIMESTAMP
+    --
+    Indexes: user_id, event_type, created_at
+  }
+
+  entity "security_audit_logs" {
+    * **id** : INTEGER <<PK>>
+    --
+    * **user_id** : INTEGER <<FK>>
+    * **action** : VARCHAR(100)
+    * **resource_type** : VARCHAR(100)
+    resource_id : INTEGER
+    * **ip_address** : VARCHAR(45)
+    user_agent : TEXT
+    * **created_at** : TIMESTAMP
+    --
+    Indexes: user_id, action, resource_type, created_at
+  }
+
+  entity "admin_logs" {
+    * **id** : INTEGER <<PK>>
+    --
+    * **admin_id** : INTEGER <<FK>>
+    * **action** : VARCHAR(100)
+    target_user_id : INTEGER
+    details : JSONB
+    ip_address : VARCHAR(45)
+    created_at : TIMESTAMP
+  }
+}
+
+' ============================================
+' THREAT INTELLIGENCE TABLES
+' ============================================
+
+package "Threat Intelligence" #LightSalmon {
+  entity "monitored_items" {
+    * **id** : INTEGER <<PK>>
+    --
+    * **user_id** : INTEGER <<FK>>
+    * **item_type** : VARCHAR(50)
+    * **item_value** : VARCHAR(255)
+    is_active : BOOLEAN
+    is_verified : BOOLEAN
+    last_checked : TIMESTAMP
+    alert_threshold : INTEGER
+    created_at : TIMESTAMP
+    --
+    Indexes: user_id, item_type, item_value, is_active
+  }
+
+  entity "monitoring_alerts" {
+    * **id** : INTEGER <<PK>>
+    --
+    * **monitored_item_id** : INTEGER <<FK>>
+    * **alert_type** : VARCHAR(50)
+    * **severity** : VARCHAR(20)
+    message : TEXT
+    source_url : VARCHAR(512)
+    is_read : BOOLEAN
+    created_at : TIMESTAMP
+    --
+    Indexes: monitored_item_id, alert_type, created_at
+  }
+}
+
+' ============================================
+' CONFIGURATION TABLES
+' ============================================
+
+package "Configuration" #LightGray {
+  entity "smtp_settings" {
+    * **id** : INTEGER <<PK>>
+    --
+    * **host** : VARCHAR(255)
+    * **port** : INTEGER
+    * **username** : VARCHAR(255)
+    * **password** : VARCHAR(255)
+    from_email : VARCHAR(255)
+    from_name : VARCHAR(255)
+    use_tls : BOOLEAN
+    is_active : BOOLEAN
+    updated_at : TIMESTAMP
+  }
+
+  entity "contact_messages" {
+    * **id** : INTEGER <<PK>>
+    --
+    * **name** : VARCHAR(255)
+    * **email** : VARCHAR(255)
+    subject : VARCHAR(255)
+    * **message** : TEXT
+    is_read : BOOLEAN
+    created_at : TIMESTAMP
+  }
+}
+
+' ============================================
+' RELATIONSHIPS
+' ============================================
+
+' User Management Relationships
+users ||--o{ sessions : "has"
+users ||--o| two_factor_sessions : "has"
+users ||--o| ip_lock_policies : "has"
+users ||--o{ login_activity : "generates"
+users ||--o{ login_alerts : "receives"
+
+login_activity ||--o{ login_alerts : "triggers"
+
+' Subscription Relationships
+users ||--o{ user_subscriptions : "has"
+users ||--o{ user_monthly_quota : "tracks"
+users ||--o{ billing_records : "has"
+subscription_plans ||--o{ user_subscriptions : "defines"
+
+' Search Relationships
+users ||--o{ search_logs : "performs"
+users ||--o{ search_history : "has"
+search_index ||--o{ search_index_lines : "contains"
+
+' API Relationships
+users ||--o{ api_keys : "owns"
+api_keys ||--o{ api_key_usage : "tracks"
+
+' Security Relationships
+users ||--o{ security_logs : "generates"
+users ||--o{ security_audit_logs : "performs"
+users ||--o{ admin_logs : "creates" as admin
+
+' Threat Intelligence Relationships
+users ||--o{ monitored_items : "monitors"
+monitored_items ||--o{ monitoring_alerts : "generates"
+
+note right of users
+  **Core User Table**
+  - Primary key: id
+  - Unique: email, username
+  - Indexes: role, subscription_type
+  - Relationships: 15+ tables
+end note
+
+note right of search_index
+  **Search Index Table**
+  - Tracks all indexed files
+  - One-to-many with search_index_lines
+  - Full-text search via TSVECTOR
+end note
+
+note right of subscription_plans
+  **Subscription Plans**
+  - Defines tier structure
+  - Free, Starter, Professional, Enterprise
+  - Search limits and features per tier
+end note
+
+@enduml
+
+
+
+
+

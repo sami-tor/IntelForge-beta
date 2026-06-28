@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 540" font-family="Helvetica,Arial,sans-serif" font-size="11">
+  <style>
+    .actor-stick { stroke:#0f172a; stroke-width:1.6; fill:none; }
+    .actor-label { fill:#0f172a; font-weight:600; }
+    .uc { fill:#e0f2fe; stroke:#0ea5e9; }
+    .label { fill:#0f172a; }
+    .system-box { fill:none; stroke:#94a3b8; stroke-dasharray:5 4; rx:14; ry:14; }
+    .conn { stroke:#94a3b8; stroke-width:1; fill:none; }
+  </style>
+  <text x="360" y="22" text-anchor="middle" class="actor-label" font-size="14">IntelForge — Use Case Diagram</text>
+
+  <!-- System boundary -->
+  <rect x="180" y="50" width="380" height="460" class="system-box"/>
+  <text x="370" y="72" text-anchor="middle" class="label" font-size="11">IntelForge Automation</text>
+
+  <!-- Actors -->
+  <g>
+    <!-- Analyst -->
+    <circle cx="60" cy="100" r="14" class="actor-stick"/>
+    <line x1="60" y1="114" x2="60" y2="160" class="actor-stick"/>
+    <line x1="40" y1="125" x2="80" y2="125" class="actor-stick"/>
+    <line x1="60" y1="160" x2="40" y2="190" class="actor-stick"/>
+    <line x1="60" y1="160" x2="80" y2="190" class="actor-stick"/>
+    <text x="60" y="210" text-anchor="middle" class="actor-label">Analyst</text>
+
+    <!-- Admin -->
+    <circle cx="60" cy="280" r="14" class="actor-stick"/>
+    <line x1="60" y1="294" x2="60" y2="340" class="actor-stick"/>
+    <line x1="40" y1="305" x2="80" y2="305" class="actor-stick"/>
+    <line x1="60" y1="340" x2="40" y2="370" class="actor-stick"/>
+    <line x1="60" y1="340" x2="80" y2="370" class="actor-stick"/>
+    <text x="60" y="390" text-anchor="middle" class="actor-label">Admin</text>
+
+    <!-- SOC tool -->
+    <circle cx="660" cy="280" r="14" class="actor-stick"/>
+    <line x1="660" y1="294" x2="660" y2="340" class="actor-stick"/>
+    <line x1="640" y1="305" x2="680" y2="305" class="actor-stick"/>
+    <line x1="660" y1="340" x2="640" y2="370" class="actor-stick"/>
+    <line x1="660" y1="340" x2="680" y2="370" class="actor-stick"/>
+    <text x="660" y="390" text-anchor="middle" class="actor-label">SIEM / SOC tool</text>
+
+    <!-- Cron -->
+    <circle cx="660" cy="100" r="14" class="actor-stick"/>
+    <line x1="660" y1="114" x2="660" y2="160" class="actor-stick"/>
+    <line x1="640" y1="125" x2="680" y2="125" class="actor-stick"/>
+    <line x1="660" y1="160" x2="640" y2="190" class="actor-stick"/>
+    <line x1="660" y1="160" x2="680" y2="190" class="actor-stick"/>
+    <text x="660" y="210" text-anchor="middle" class="actor-label">Cron scheduler</text>
+  </g>
+
+  <!-- Use cases -->
+  <g>
+    <ellipse cx="290" cy="100" rx="80" ry="20" class="uc"/>
+    <text x="290" y="104" text-anchor="middle" class="label">View live posture</text>
+
+    <ellipse cx="290" cy="155" rx="80" ry="20" class="uc"/>
+    <text x="290" y="159" text-anchor="middle" class="label">Read briefing</text>
+
+    <ellipse cx="290" cy="210" rx="80" ry="20" class="uc"/>
+    <text x="290" y="214" text-anchor="middle" class="label">Download PDF</text>
+
+    <ellipse cx="450" cy="100" rx="90" ry="20" class="uc"/>
+    <text x="450" y="104" text-anchor="middle" class="label">Manage action queue</text>
+
+    <ellipse cx="450" cy="155" rx="90" ry="20" class="uc"/>
+    <text x="450" y="159" text-anchor="middle" class="label">Comment + assign</text>
+
+    <ellipse cx="450" cy="210" rx="90" ry="20" class="uc"/>
+    <text x="450" y="214" text-anchor="middle" class="label">Live SSE stream</text>
+
+    <ellipse cx="290" cy="290" rx="80" ry="20" class="uc"/>
+    <text x="290" y="294" text-anchor="middle" class="label">Hunt builder</text>
+
+    <ellipse cx="290" cy="345" rx="80" ry="20" class="uc"/>
+    <text x="290" y="349" text-anchor="middle" class="label">Export CSV</text>
+
+    <ellipse cx="450" cy="290" rx="90" ry="20" class="uc"/>
+    <text x="450" y="294" text-anchor="middle" class="label">Run pipeline now</text>
+
+    <ellipse cx="450" cy="345" rx="90" ry="20" class="uc"/>
+    <text x="450" y="349" text-anchor="middle" class="label">Inspect run history</text>
+
+    <ellipse cx="370" cy="420" rx="100" ry="22" class="uc"/>
+    <text x="370" y="424" text-anchor="middle" class="label">Receive webhook alerts</text>
+
+    <ellipse cx="370" cy="470" rx="100" ry="22" class="uc"/>
+    <text x="370" y="474" text-anchor="middle" class="label">Run scheduled cron</text>
+  </g>
+
+  <!-- Connections -->
+  <g>
+    <line x1="80" y1="100" x2="210" y2="100" class="conn"/>
+    <line x1="80" y1="155" x2="210" y2="155" class="conn"/>
+    <line x1="80" y1="210" x2="210" y2="210" class="conn"/>
+    <line x1="80" y1="290" x2="210" y2="290" class="conn"/>
+    <line x1="80" y1="345" x2="210" y2="345" class="conn"/>
+    <line x1="80" y1="290" x2="210" y2="290" class="conn"/>
+    <line x1="80" y1="320" x2="350" y2="425" class="conn"/>
+
+    <line x1="80" y1="100" x2="540" y2="100" class="conn"/>
+    <line x1="80" y1="155" x2="540" y2="155" class="conn"/>
+    <line x1="80" y1="280" x2="360" y2="290" class="conn"/>
+    <line x1="80" y1="290" x2="360" y2="345" class="conn"/>
+    <line x1="80" y1="290" x2="540" y2="290" class="conn"/>
+    <line x1="80" y1="290" x2="540" y2="345" class="conn"/>
+
+    <line x1="640" y1="280" x2="475" y2="425" class="conn"/>
+    <line x1="640" y1="100" x2="475" y2="475" class="conn"/>
+  </g>
+</svg>

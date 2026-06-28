@@ -1,0 +1,52 @@
+version: 0.6
+
+index_id: osint-data
+index_uri: file:///quickwit/data/indexes/osint-data
+
+doc_mapping:
+  mode: lenient
+  field_mappings:
+    - name: timestamp
+      type: datetime
+      input_formats:
+        - unix_timestamp
+      fast: true
+      indexed: true
+    - name: file_path
+      type: text
+      tokenizer: raw
+      stored: true
+      indexed: true
+    - name: file_name
+      type: text
+      tokenizer: default
+      stored: true
+      indexed: true
+    - name: line_number
+      type: u64
+      stored: true
+      indexed: true
+    - name: content
+      type: text
+      tokenizer: default
+      stored: true
+      indexed: true
+      record: position
+    - name: file_type
+      type: text
+      tokenizer: raw
+      stored: true
+      indexed: true
+    - name: country
+      type: text
+      tokenizer: raw
+      stored: true
+      indexed: true
+    - name: category
+      type: text
+      tokenizer: raw
+      stored: true
+      indexed: true
+
+search_settings:
+  default_search_fields: [content, file_name, file_path]

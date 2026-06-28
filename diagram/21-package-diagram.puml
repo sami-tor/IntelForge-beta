@@ -1,0 +1,79 @@
+@startuml Package Diagram - Intel Forge
+skinparam backgroundColor white
+skinparam defaultFontSize 11
+skinparam ArrowColor #1565C0
+skinparam ArrowThickness 1
+skinparam package {
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+  FontColor #0D47A1
+}
+
+title <b>Package Diagram</b>\nIntel Forge Module Dependencies
+
+package "app/" as AppPkg {
+  package "app/intelligence/\n(27 intel pages)" as IntelPages
+  package "app/intelligence/\ncommand-center\nclusters\naction-queue\nhunt\nbriefings" as AutoPages
+  package "app/api/intel/\nautomation/" as AutoAPI
+  package "app/api/cron/" as CronAPI
+  package "app/api/admin/" as AdminAPI
+  package "app/dashboard/" as DashPages
+  package "app/admin/" as AdminPages
+  package "app/login/\nregister/" as AuthPages
+}
+
+package "lib/" as LibPkg {
+  package "lib/intel/automation/\n(20 modules, 4941 lines)" as AutoLib {
+    package "correlator-v2.ts\n(987 lines)" as CorrelatorPkg
+    package "threat-score.ts" as ScorePkg
+    package "forecast.ts +\nforecast-backtest.ts" as ForecastPkg
+    package "action-queue.ts +\naction-collab.ts" as ActionPkg
+    package "briefing-generator.ts +\nbriefing-pdf.ts +\nbriefing-llm.ts" as BriefPkg
+    package "orchestrator.ts" as OrchPkg
+    package "events.ts +\nnotifications.ts" as EventPkg
+    package "geo-sector.ts" as GeoPkg
+  }
+  package "lib/intel/fetchers/\n(13 feed fetchers)" as FetchersPkg
+  package "lib/intel/\n(types, cache, gate, ...)" as IntelCorePkg
+  package "lib/\n(db, auth, jwt, security, ...)" as CorePkg
+}
+
+package "components/" as CompPkg {
+  package "components/intelligence/\n(sidebar, gauge, sparkline,\nforecast-chart, geo-heatmap,\nlive-score-indicator)" as IntelCompPkg
+  package "components/ui/\n(button, card, input, ...)" as UICompPkg
+}
+
+package "scripts/" as ScriptsPkg {
+  package "SQL migrations\n(v1-v4 + seeds)" as MigrationsPkg
+  package "build-defence-pdf.mjs\ndemo.ps1" as ToolsPkg
+}
+
+package "tests/" as TestsPkg {
+  package "12 test suites\n(84 cases)" as TestSuitesPkg
+}
+
+' Dependencies
+AutoPages ..> AutoAPI : fetches
+AutoPages ..> IntelCompPkg : renders
+IntelPages ..> IntelCorePkg : reads cache
+AutoAPI ..> AutoLib : calls
+CronAPI ..> OrchPkg : triggers
+AdminAPI ..> AutoLib : reads
+
+OrchPkg ..> ScorePkg : stage 1
+OrchPkg ..> CorrelatorPkg : stage 2
+OrchPkg ..> ForecastPkg : stage 4
+OrchPkg ..> ActionPkg : stage 6
+OrchPkg ..> BriefPkg : stage 7
+OrchPkg ..> EventPkg : stage 8
+OrchPkg ..> GeoPkg : stage 5
+
+CorrelatorPkg ..> IntelCorePkg : reads feed cache
+ScorePkg ..> CorePkg : query()
+FetchersPkg ..> IntelCorePkg : writes cache
+AutoLib ..> CorePkg : query()
+
+TestSuitesPkg ..> AutoAPI : HTTP calls
+MigrationsPkg ..> CorePkg : schema
+
+@enduml

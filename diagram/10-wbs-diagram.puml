@@ -1,0 +1,142 @@
+@startuml WBS Diagram - Intel Forge Project
+skinparam backgroundColor white
+skinparam ArrowColor #1565C0
+skinparam ArrowThickness 1
+skinparam defaultFontSize 11
+skinparam linetype ortho
+skinparam packageStyle rectangle
+
+title Work Breakdown Structure (WBS) - Intel Forge OSINT Platform
+
+package "1.0 Project Initiation" #LightBlue {
+  rectangle "1.1 Requirements Gathering" as R1
+  rectangle "1.2 Stakeholder Analysis" as R2
+  rectangle "1.3 Use Case Development" as R3
+  rectangle "1.4 Requirements Documentation" as R4
+}
+
+package "2.0 System Design" #LightGreen {
+  rectangle "2.1 Architecture Design" as D1
+  rectangle "2.2 Database Design" as D2
+  rectangle "2.3 API Design" as D3
+  rectangle "2.4 UI/UX Design" as D4
+  rectangle "2.5 Security Design" as D5
+}
+
+package "3.0 Core Development" #LightYellow {
+  package "3.1 Authentication System" {
+    rectangle "3.1.1 User Registration" as A1
+    rectangle "3.1.2 Login System" as A2
+    rectangle "3.1.3 JWT Implementation" as A3
+    rectangle "3.1.4 2FA System" as A4
+    rectangle "3.1.5 Session Management" as A5
+  }
+  
+  package "3.2 Search Functionality" {
+    rectangle "3.2.1 Text Search Engine" as S1
+    rectangle "3.2.2 Face Search Engine" as S2
+    rectangle "3.2.3 Quickwit Integration" as S3
+    rectangle "3.2.4 Milvus Integration" as S4
+    rectangle "3.2.5 Search UI Components" as S5
+  }
+  
+  package "3.3 Data Collection & Automation" {
+    rectangle "3.3.1 Surface Web Scraper" as C1
+    rectangle "3.3.2 Telegram Scraper" as C2
+    rectangle "3.3.3 Dark Web Crawler" as C3
+    rectangle "3.3.4 Automated Scraping Scheduler" as C4
+    rectangle "3.3.5 Data Validation Pipeline" as C5
+  }
+  
+  package "3.4 Automatic Indexing System" {
+    rectangle "3.4.1 File Watcher Service" as I1
+    rectangle "3.4.2 Document Parser" as I2
+    rectangle "3.4.3 OCR Processor" as I3
+    rectangle "3.4.4 Archive Extractor" as I4
+    rectangle "3.4.5 Quickwit Indexer" as I5
+    rectangle "3.4.6 Face Indexer" as I6
+    rectangle "3.4.7 Batch Processing" as I7
+  }
+  
+  package "3.5 Threat Intelligence" {
+    rectangle "3.5.1 Brand Monitoring" as T1
+    rectangle "3.5.2 Threat Detection" as T2
+    rectangle "3.5.3 Automated Alerts" as T3
+    rectangle "3.5.4 Threat Analysis" as T4
+  }
+  
+  package "3.6 Admin Panel" {
+    rectangle "3.6.1 User Management" as AD1
+    rectangle "3.6.2 System Monitoring" as AD2
+    rectangle "3.6.3 Security Logs" as AD3
+    rectangle "3.6.4 Subscription Management" as AD4
+  }
+}
+
+package "4.0 Integration & Testing" #LightCoral {
+  rectangle "4.1 Integration Testing" as IT1
+  rectangle "4.2 Security Testing" as IT2
+  rectangle "4.3 Penetration Testing" as IT3
+  rectangle "4.4 Performance Testing" as IT4
+  rectangle "4.5 User Acceptance Testing" as IT5
+}
+
+package "5.0 Deployment & Documentation" #LightGray {
+  rectangle "5.1 System Deployment" as DP1
+  rectangle "5.2 Documentation" as DP2
+  rectangle "5.3 Re-Engineering Analysis" as DP3
+  rectangle "5.4 Report Writing" as DP4
+}
+
+' Level 1 to Level 2 relationships
+R1 --> D1
+R2 --> D1
+R3 --> D1
+R4 --> D1
+
+D1 --> A1
+D2 --> A1
+D3 --> A1
+D4 --> A1
+D5 --> A1
+
+' Level 2 to Level 3 relationships
+A1 --> S1
+A2 --> S1
+A3 --> S1
+
+S1 --> C1
+S2 --> C1
+S3 --> C1
+
+C1 --> I1
+C2 --> I1
+C3 --> I1
+C4 --> I1
+
+I1 --> T1
+I5 --> T1
+I6 --> T1
+
+A1 --> AD1
+S1 --> AD1
+C1 --> AD1
+I1 --> AD1
+
+' Level 3 to Level 4 relationships
+AD1 --> IT1
+T1 --> IT1
+
+IT1 --> IT2
+IT2 --> IT3
+IT3 --> IT4
+IT4 --> IT5
+
+IT5 --> DP1
+DP1 --> DP2
+DP2 --> DP3
+DP3 --> DP4
+
+@enduml
+
+

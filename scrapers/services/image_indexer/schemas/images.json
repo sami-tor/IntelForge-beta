@@ -1,0 +1,53 @@
+{
+  "description": "Qdrant images collection payload schema",
+  "fields": {
+    "image_id": {
+      "type": "string",
+      "description": "Unique image identifier (MD5 hash of path)"
+    },
+    "path": {
+      "type": "string",
+      "description": "Original image file path"
+    },
+    "thumbnail": {
+      "type": "string",
+      "description": "Path to thumbnail image"
+    },
+    "webp": {
+      "type": "string",
+      "description": "Path to WebP compressed version (if smaller)"
+    },
+    "width": {
+      "type": "integer",
+      "description": "Image width in pixels"
+    },
+    "height": {
+      "type": "integer",
+      "description": "Image height in pixels"
+    },
+    "format": {
+      "type": "string",
+      "description": "Image format (jpeg/png/webp/etc)"
+    },
+    "ocr_text": {
+      "type": "string",
+      "description": "Extracted OCR text"
+    },
+    "objects": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of detected object classes"
+    },
+    "faces_count": {
+      "type": "integer",
+      "description": "Number of faces detected"
+    },
+    "phash": {
+      "type": "string",
+      "description": "Perceptual hash for duplicate detection"
+    }
+  }
+}
+

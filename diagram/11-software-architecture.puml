@@ -1,0 +1,139 @@
+@startuml Software Architecture Diagram
+skinparam backgroundColor white
+skinparam linetype polyline
+skinparam defaultFontSize 11
+skinparam component {
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+  FontColor #0D47A1
+}
+skinparam package {
+  BackgroundColor #F5F5F5
+  BorderColor #90A4AE
+  FontColor #37474F
+}
+skinparam database {
+  BackgroundColor #FFF3E0
+  BorderColor #E65100
+  FontColor #BF360C
+}
+skinparam ArrowColor #1565C0
+skinparam ArrowThickness 1
+
+title <b>Software Architecture</b>\nIntel Forge OSINT & Threat Intelligence Platform
+
+package "Client Layer" #ECEFF1 {
+  [Web Browser] as Browser
+  [EventSource (SSE)] as SSE_Client
+}
+
+package "Presentation Layer (Next.js 16)" #E8F5E9 {
+  [Intelligence Hub\n(27 modules)] as IntelHub
+  [Command Center] as CmdCenter
+  [Action Queue] as ActionUI
+  [Correlation Explorer] as ClusterUI
+  [Hunt Builder] as HuntUI
+  [Admin Panel] as AdminUI
+  [Swagger UI\n(/api-docs)] as SwaggerUI
+}
+
+package "API Layer (Next.js App Router)" #E3F2FD {
+  [Auth API\n(JWT + 2FA + CSRF)] as AuthAPI
+  [Intel Feed APIs\n(/api/intel/*)] as IntelAPI
+  [Automation APIs\n(/api/intel/automation/*)] as AutoAPI
+  [Cron Endpoints\n(/api/cron/*)] as CronAPI
+  [Admin APIs\n(/api/admin/*)] as AdminAPI
+  [SSE Stream\n(/api/intel/automation/stream)] as SSE_API
+}
+
+package "Automation Layer (FYP)" #E8EAF6 {
+  [Orchestrator\n(10 stages)] as Orchestrator
+  [Threat Score] as ThreatScore
+  [Deep Correlator v2\n(3 anchors, 11 signals)] as Correlator
+  [Forecast + Backtest\n(Holt/HW/Naive)] as Forecast
+  [Action Queue Generator] as ActionGen
+  [Briefing Generator\n(+ optional LLM)] as BriefGen
+  [Geo/Sector Index] as GeoSector
+  [Notifications\n(Webhook + NOTIFY)] as Notifier
+}
+
+package "Feed-Sync Layer (existing)" #FFF3E0 {
+  [13 Feed Fetchers\n(news, CVE, ransomware, ...)] as Fetchers
+  [Scraper Runner] as ScraperRunner
+}
+
+package "Data Layer" #FBE9E7 {
+  database "PostgreSQL 16\n(17 automation tables\n+ feed cache tables)" as PG
+  database "Milvus\n(face embeddings)" as Milvus
+  database "MinIO\n(file storage)" as MinIO
+}
+
+package "External" #ECEFF1 {
+  [Upstream Feeds\n(NVD, KEV, ExploitDB, ...)] as Feeds
+  [Webhook Subscribers\n(SIEM, Slack, custom)] as Webhooks
+}
+
+' Client → Presentation
+Browser --> IntelHub
+Browser --> CmdCenter
+Browser --> ActionUI
+Browser --> ClusterUI
+Browser --> HuntUI
+Browser --> AdminUI
+Browser --> SwaggerUI
+SSE_Client --> SSE_API
+
+' Presentation → API
+IntelHub --> IntelAPI
+CmdCenter --> AutoAPI
+ActionUI --> AutoAPI
+ClusterUI --> AutoAPI
+HuntUI --> AutoAPI
+AdminUI --> AdminAPI
+
+' API → Automation
+CronAPI --> Orchestrator
+AutoAPI --> ThreatScore
+AutoAPI --> Correlator
+AutoAPI --> Forecast
+AutoAPI --> ActionGen
+AutoAPI --> BriefGen
+AutoAPI --> GeoSector
+
+' Orchestrator → stages
+Orchestrator --> ThreatScore
+Orchestrator --> Correlator
+Orchestrator --> Forecast
+Orchestrator --> ActionGen
+Orchestrator --> BriefGen
+Orchestrator --> GeoSector
+Orchestrator --> Notifier
+
+' All → DB
+ThreatScore --> PG
+Correlator --> PG
+Forecast --> PG
+ActionGen --> PG
+BriefGen --> PG
+GeoSector --> PG
+Notifier --> PG
+AuthAPI --> PG
+IntelAPI --> PG
+Fetchers --> PG
+
+' Feed sync
+Feeds --> Fetchers
+ScraperRunner --> Fetchers
+
+' Notifications
+Notifier --> Webhooks
+
+' SSE
+SSE_API --> PG : LISTEN/NOTIFY
+
+' Legacy search
+IntelAPI --> Milvus
+IntelAPI --> MinIO
+
+@enduml
+

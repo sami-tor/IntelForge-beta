@@ -1,0 +1,123 @@
+@startuml Activity Diagram - Automation Pipeline
+skinparam backgroundColor white
+skinparam linetype polyline
+skinparam defaultFontSize 11
+skinparam activity {
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+  FontColor #0D47A1
+  ArrowColor #1565C0
+}
+skinparam partition {
+  BackgroundColor #F5F5F5
+  BorderColor #90A4AE
+}
+skinparam ArrowColor #1565C0
+
+title <b>Activity Diagram</b>\nAutomation Pipeline (10 Stages)
+
+start
+
+:Cron scheduler triggers\nPOST /api/cron/automation;
+
+:Verify CRON_SECRET bearer token;
+if (Authorized?) then (no)
+  :Return 401 Unauthorized;
+  stop
+endif
+
+:Check rate limit (10/min/IP);
+if (Rate limited?) then (yes)
+  :Return 429 + Retry-After;
+  stop
+endif
+
+:Log run start\n(intel_automation_runs);
+
+partition "Stage 1: Threat Score" {
+  :Run 10 parallel COUNT queries\n(KEV, critical CVEs, ransomware, exploits, ...);
+  :Apply weighted formula\n(baseline 30 + component contributions);
+  :Compute 24h delta vs prior snapshot;
+  :INSERT intel_threat_score_history;
+  :NOTIFY score.updated;
+}
+
+partition "Stage 2: Deep Correlation" {
+  fork
+    :CVE-anchored pass (80 CVEs)\nExploits + news + paste + actors\n+ victims + darknet + stealer;
+  fork again
+    :Actor-anchored pass\nCVE links + breaches + darknet + paste;
+  fork again
+    :Ransomware-anchored pass\nVictims + breaches + darknet + CVEs;
+  end fork
+  :Score clusters (weighted + time-decay);
+  :UPSERT intel_correlation_clusters;
+  :NOTIFY cluster.upserted;
+}
+
+partition "Stage 3: Trend Capture" {
+  :Capture 7 KPI metrics for today;
+  :Compute delta% vs yesterday;
+  :Flag emerging metrics (threshold crossed);
+  :UPSERT intel_trend_metrics;
+}
+
+partition "Stage 4: Forecast + Anomaly" {
+  :Run Holt / Holt-Winters / Naive\nfor each metric with >= 4 points;
+  :Generate 7-day predictions + CI;
+  :UPSERT intel_metric_forecasts;
+  :Z-score over 14-day window;
+  if (|z| >= 2 AND |deviation| >= 2?) then (yes)
+    :UPSERT intel_anomalies;
+    :Attribute source rows (caused_by);
+    :NOTIFY anomaly.detected;
+  endif
+  :Run backtest (MAPE/RMSE/MAE)\nfor 3 methods per metric;
+  :INSERT intel_forecast_accuracy;
+}
+
+partition "Stage 5: Geo + Sector" {
+  :GROUP BY country (ransomware + phishing + darknet);
+  :GROUP BY sector;
+  :Compute weighted risk scores;
+  :UPSERT intel_geo_threat + intel_sector_risk;
+}
+
+partition "Stage 6: Action Queue" {
+  :Read top clusters (score >= 50);
+  :Read high-severity anomalies;
+  :Emit patch/hunt/block/review/drill tasks;
+  :UPSERT intel_action_queue\n(idempotent on SHA-256 action_key);
+  :NOTIFY action.created;
+}
+
+partition "Stage 7: Executive Briefing" {
+  :Build headline (tiered template);
+  :Build narrative (3-5 sentences from numbers);
+  :Optional: LLM rewrite if configured;
+  :Build highlights + recommendations;
+  :UPSERT intel_briefings (one per day);
+  :NOTIFY briefing.published;
+}
+
+partition "Stage 8: Notifications (best-effort)" {
+  if (Briefing severity >= high?) then (yes)
+    :Fire webhook (alert.created);
+  endif
+  if (Critical anomalies?) then (yes)
+    :Fire webhook per anomaly;
+  endif
+  if (Clusters score >= 80?) then (yes)
+    :Fire webhook per cluster;
+  endif
+  :Log all dispatches to\nintel_notification_log;
+}
+
+:Log run end (success/failed + duration);
+:NOTIFY pipeline.complete;
+:Prune rate-limit log (hourly);
+
+stop
+
+@enduml
+

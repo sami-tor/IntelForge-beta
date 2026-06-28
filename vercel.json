@@ -1,0 +1,28 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/monitoring",
+      "schedule": "0 */6 * * *"
+    },
+    {
+      "path": "/api/cron/intel-sync?feed=news",
+      "schedule": "*/30 * * * *"
+    },
+    {
+      "path": "/api/cron/intel-sync?feed=malware",
+      "schedule": "*/30 * * * *"
+    },
+    {
+      "path": "/api/cron/intel-sync?feed=ransomware",
+      "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron/intel-sync?feed=cve",
+      "schedule": "0 */6 * * *"
+    },
+    {
+      "path": "/api/cron/intel-sync?feed=mitre",
+      "schedule": "0 2 * * *"
+    }
+  ]
+}

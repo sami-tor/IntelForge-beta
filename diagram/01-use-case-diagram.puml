@@ -1,0 +1,128 @@
+@startuml Use Case Diagram - Intel Forge
+skinparam backgroundColor white
+skinparam linetype polyline
+skinparam handwritten false
+skinparam defaultFontSize 11
+skinparam usecase {
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+  FontColor #0D47A1
+  ArrowColor #1565C0
+}
+skinparam actor {
+  BackgroundColor white
+  BorderColor #1565C0
+  FontColor #0D47A1
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #1565C0
+  RoundCorner 15
+}
+skinparam ArrowColor #1565C0
+skinparam ArrowThickness 1
+
+title <b>Use Case Diagram</b>\nIntel Forge OSINT & Threat Intelligence Platform
+
+left to right direction
+
+actor "Free User" as FreeUser
+actor "Premium User" as ProUser
+actor "Admin" as Admin
+actor "Cron Scheduler" as Cron
+actor "SOC / SIEM" as SOC
+
+rectangle "Intel Forge Platform" {
+
+  package "Authentication" {
+    usecase "Register" as UC1
+    usecase "Login (JWT + 2FA)" as UC2
+    usecase "OAuth Login" as UC3
+  }
+
+  package "Search & OSINT" {
+    usecase "Face Search by Image" as UC4
+    usecase "Text / File Search" as UC5
+    usecase "IOC Lookup" as UC6
+    usecase "Bulk IOC Correlation" as UC7
+  }
+
+  package "Intelligence Hub (27 modules)" {
+    usecase "View Cyber News" as UC8
+    usecase "CVE Intelligence" as UC9
+    usecase "Ransomware Tracker" as UC10
+    usecase "Threat Actor Profiles" as UC11
+    usecase "Dark Web Monitor" as UC12
+    usecase "Phishing / Supply Chain" as UC13
+  }
+
+  package "Automation Layer (FYP)" {
+    usecase "View Command Center" as UC14
+    usecase "View Correlation Clusters" as UC15
+    usecase "Manage Action Queue" as UC16
+    usecase "Download PDF Briefing" as UC17
+    usecase "Threat Hunt Builder" as UC18
+    usecase "Live SSE Stream" as UC19
+    usecase "Trigger Pipeline" as UC20
+    usecase "Receive Webhook Alert" as UC21
+  }
+
+  package "Administration" {
+    usecase "Manage Users" as UC22
+    usecase "View Audit Logs" as UC23
+    usecase "Run Automation Pipeline" as UC24
+    usecase "Configure Settings" as UC25
+  }
+}
+
+' Free User
+FreeUser --> UC1
+FreeUser --> UC2
+FreeUser --> UC4
+FreeUser --> UC5
+FreeUser --> UC8
+FreeUser --> UC9
+FreeUser --> UC14
+
+' Premium User (inherits Free)
+ProUser --> UC2
+ProUser --> UC4
+ProUser --> UC5
+ProUser --> UC6
+ProUser --> UC7
+ProUser --> UC8
+ProUser --> UC9
+ProUser --> UC10
+ProUser --> UC11
+ProUser --> UC12
+ProUser --> UC13
+ProUser --> UC14
+ProUser --> UC15
+ProUser --> UC16
+ProUser --> UC17
+ProUser --> UC18
+ProUser --> UC19
+
+' Admin
+Admin --> UC22
+Admin --> UC23
+Admin --> UC24
+Admin --> UC25
+Admin --> UC14
+Admin --> UC15
+
+' Cron
+Cron --> UC20
+
+' SOC
+SOC --> UC21
+
+' Relationships
+UC4 ..> UC5 : <<include>>
+UC20 ..> UC15 : <<include>>
+UC20 ..> UC16 : <<include>>
+UC20 ..> UC17 : <<include>>
+UC15 ..> UC21 : <<extend>>
+
+@enduml
+

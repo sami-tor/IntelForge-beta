@@ -1,0 +1,67 @@
+@startuml DFD Level 1 - Automation Pipeline
+skinparam backgroundColor white
+skinparam defaultFontSize 11
+skinparam ArrowColor #1565C0
+skinparam ArrowThickness 1
+skinparam component {
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+  FontColor #0D47A1
+}
+
+title <b>DFD Level 1</b>\nAutomation Pipeline Data Flow
+
+actor "Cron Scheduler" as Cron
+actor "Analyst" as Analyst
+actor "SOC / SIEM" as SOC
+
+rectangle "Automation Pipeline" {
+  component "1.0\nCompute\nThreat Score" as P1
+  component "2.0\nDeep\nCorrelation" as P2
+  component "3.0\nCapture\nTrends" as P3
+  component "4.0\nForecast &\nAnomaly" as P4
+  component "5.0\nGeo/Sector\nIndex" as P5
+  component "6.0\nGenerate\nActions" as P6
+  component "7.0\nGenerate\nBriefing" as P7
+  component "8.0\nDispatch\nNotifications" as P8
+}
+
+database "Feed Cache\n(12 tables)" as FeedDB
+database "Automation Tables\n(17 tables)" as AutoDB
+
+' Input
+Cron --> P1 : trigger (CRON_SECRET)
+
+' Feed cache reads
+FeedDB --> P1 : CVE counts, KEV, ransomware,\nphishing, malware, exploits
+FeedDB --> P2 : CVEs + exploits + news +\npaste + stealer + actors +\nvictims + darknet
+FeedDB --> P3 : daily KPI counts
+FeedDB --> P5 : country/sector aggregates
+
+' Internal flow
+P1 --> P7 : threat score
+P2 --> P6 : top clusters
+P2 --> P7 : top clusters
+P3 --> P4 : trend history
+P4 --> P6 : anomalies
+
+' Writes to automation DB
+P1 --> AutoDB : intel_threat_score_history
+P2 --> AutoDB : intel_correlation_clusters
+P3 --> AutoDB : intel_trend_metrics
+P4 --> AutoDB : intel_metric_forecasts\nintel_anomalies\nintel_forecast_accuracy
+P5 --> AutoDB : intel_geo_threat\nintel_sector_risk
+P6 --> AutoDB : intel_action_queue
+P7 --> AutoDB : intel_briefings
+
+' Outputs to users
+AutoDB --> Analyst : Command Center page\nAction Queue page\nPDF briefing
+P8 --> SOC : webhook (alert.created)
+P6 --> Analyst : prioritised tasks
+
+' Notification trigger
+P7 --> P8 : if severity >= high
+P4 --> P8 : if anomaly critical
+P2 --> P8 : if cluster score >= 80
+
+@enduml

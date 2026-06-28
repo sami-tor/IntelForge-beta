@@ -1,0 +1,46 @@
+# Requirements for running visual search service locally
+# Install with: pip install -r requirements-local.txt
+
+# PyTorch with CUDA support (Windows)
+# For CUDA 12.1: pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+# For CUDA 11.8: pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+# For CPU only: pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+
+# Core ML libraries
+transformers>=4.35.0
+accelerate>=0.24.0
+
+# Object Detection
+ultralytics>=8.1.0
+
+# OCR (optional - requires C compiler for scikit-image)
+# easyocr>=1.7.0  # Install separately if needed: pip install easyocr
+pytesseract>=0.3.10
+
+# Image Processing
+Pillow>=10.0.0
+opencv-python-headless>=4.8.0
+numpy>=1.24.0
+imagehash>=4.3.1
+exifread>=3.0.0
+
+# Face Detection & Recognition
+insightface>=0.7.3
+# onnxruntime>=1.16.0  # Optional - install separately if needed
+onnx>=1.15.0
+faiss-cpu>=1.7.4
+
+# Vector Database
+pymilvus>=2.4.0
+
+# Object Storage
+minio>=7.2.0
+
+# Web Framework
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+python-multipart>=0.0.6
+
+# Utilities
+sentencepiece>=0.1.99
+

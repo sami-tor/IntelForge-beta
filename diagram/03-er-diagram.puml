@@ -1,0 +1,198 @@
+@startuml ER Diagram - Intel Forge
+skinparam backgroundColor white
+skinparam entity {
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+  FontColor #0D47A1
+}
+skinparam linetype ortho
+skinparam ArrowColor #1565C0
+skinparam ArrowThickness 1
+skinparam defaultFontSize 11
+skinparam linetype ortho
+
+title Entity Relationship Diagram - Intel Forge Database
+
+entity "users" {
+  * id : INTEGER <<PK>>
+  --
+  * email : VARCHAR(255) <<UNIQUE>>
+  * password_hash : VARCHAR(255)
+  * username : VARCHAR(100) <<UNIQUE>>
+  * role : VARCHAR(20)
+  * verification_status : VARCHAR(20)
+  * subscription_type : VARCHAR(50)
+  subscription_start : DATE
+  subscription_end : DATE
+  is_lifetime : BOOLEAN
+  is_active : BOOLEAN
+  search_count : INTEGER
+  search_limit : INTEGER
+  created_at : TIMESTAMP
+  last_login : TIMESTAMP
+}
+
+entity "sessions" {
+  * id : INTEGER <<PK>>
+  --
+  * user_id : INTEGER <<FK>>
+  * session_token : VARCHAR(255) <<UNIQUE>>
+  * expires_at : TIMESTAMP
+  ip_address : VARCHAR(45)
+  user_agent : TEXT
+  created_at : TIMESTAMP
+}
+
+entity "api_keys" {
+  * id : INTEGER <<PK>>
+  --
+  * user_id : INTEGER <<FK>>
+  * key_hash : VARCHAR(255) <<UNIQUE>>
+  * name : VARCHAR(255)
+  permissions : TEXT[]
+  is_active : BOOLEAN
+  last_used : TIMESTAMP
+  created_at : TIMESTAMP
+}
+
+entity "api_key_usage" {
+  * id : INTEGER <<PK>>
+  --
+  * api_key_id : INTEGER <<FK>>
+  * endpoint : VARCHAR(255)
+  * method : VARCHAR(10)
+  * status_code : INTEGER
+  * response_time : INTEGER
+  * created_at : TIMESTAMP
+}
+
+entity "search_index" {
+  * id : INTEGER <<PK>>
+  --
+  * file_path : VARCHAR(512) <<UNIQUE>>
+  * file_name : VARCHAR(255)
+  file_size : BIGINT
+  line_count : INTEGER
+  file_type : TEXT
+  indexed_at : TIMESTAMP
+  created_at : TIMESTAMP
+}
+
+entity "search_index_lines" {
+  * id : BIGINT <<PK>>
+  --
+  * index_id : INTEGER <<FK>>
+  * line_number : INTEGER
+  * line_content : TEXT
+  * search_vector : TSVECTOR
+}
+
+entity "search_logs" {
+  * id : INTEGER <<PK>>
+  --
+  * user_id : INTEGER <<FK>>
+  * query : TEXT
+  * result_count : INTEGER
+  * search_type : VARCHAR(50)
+  * response_time : INTEGER
+  * created_at : TIMESTAMP
+}
+
+entity "search_history" {
+  * id : INTEGER <<PK>>
+  --
+  * user_id : INTEGER <<FK>>
+  * query : TEXT
+  * result_count : INTEGER
+  * created_at : TIMESTAMP
+}
+
+entity "contact_messages" {
+  * id : INTEGER <<PK>>
+  --
+  * name : VARCHAR(255)
+  * email : VARCHAR(255)
+  * subject : VARCHAR(255)
+  * message : TEXT
+  * is_read : BOOLEAN
+  * created_at : TIMESTAMP
+}
+
+entity "security_logs" {
+  * id : INTEGER <<PK>>
+  --
+  event_type : VARCHAR(100)
+  details : JSONB
+  user_id : INTEGER <<FK>>
+  ip_address : VARCHAR(45)
+  created_at : TIMESTAMP
+}
+
+entity "security_audit_logs" {
+  * id : INTEGER <<PK>>
+  --
+  * user_id : INTEGER <<FK>>
+  * action : VARCHAR(100)
+  * resource_type : VARCHAR(100)
+  * resource_id : INTEGER
+  * ip_address : VARCHAR(45)
+  * user_agent : TEXT
+  * created_at : TIMESTAMP
+}
+
+entity "two_factor_sessions" {
+  * id : INTEGER <<PK>>
+  --
+  * user_id : INTEGER <<FK>>
+  * secret : VARCHAR(255)
+  * backup_codes : TEXT[]
+  * is_enabled : BOOLEAN
+  * created_at : TIMESTAMP
+}
+
+entity "billing_records" {
+  * id : INTEGER <<PK>>
+  --
+  * user_id : INTEGER <<FK>>
+  plan_id : INTEGER
+  * amount : DECIMAL(10,2)
+  paid_at : TIMESTAMP
+  period_start : TIMESTAMP
+  period_end : TIMESTAMP
+  status : VARCHAR(20)
+  invoice_id : VARCHAR(100) <<UNIQUE>>
+  created_at : TIMESTAMP
+}
+
+entity "ip_lock_policies" {
+  * id : INTEGER <<PK>>
+  --
+  * user_id : INTEGER <<FK>> <<UNIQUE>>
+  * locked_ip : VARCHAR(45)
+  allow_new_ips : BOOLEAN
+  require_approval : BOOLEAN
+  notify_on_new_ip : BOOLEAN
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+' Relationships
+users ||--o{ sessions : "has"
+users ||--o{ api_keys : "owns"
+users ||--o{ search_logs : "performs"
+users ||--o{ search_history : "has"
+users ||--o{ security_logs : "generates"
+users ||--o{ security_audit_logs : "performs"
+users ||--o| two_factor_sessions : "has"
+users ||--o{ billing_records : "has"
+users ||--o| ip_lock_policies : "has"
+
+api_keys ||--o{ api_key_usage : "tracks"
+
+search_index ||--o{ search_index_lines : "contains"
+
+@enduml
+
+
+
+

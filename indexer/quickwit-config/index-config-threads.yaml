@@ -1,0 +1,70 @@
+version: 0.6
+
+index_id: threads-profiles
+index_uri: file:///quickwit/data/indexes/threads-profiles
+
+doc_mapping:
+  mode: lenient
+  field_mappings:
+    - name: timestamp
+      type: datetime
+      input_formats:
+        - unix_timestamp
+      fast: true
+      indexed: true
+    - name: username
+      type: text
+      tokenizer: raw
+      stored: true
+      indexed: true
+    - name: full_name
+      type: text
+      tokenizer: default
+      stored: true
+      indexed: true
+    - name: bio
+      type: text
+      tokenizer: default
+      stored: true
+      indexed: true
+    - name: profile_url
+      type: text
+      tokenizer: raw
+      stored: true
+      indexed: true
+    - name: profile_pic_url
+      type: text
+      tokenizer: raw
+      stored: true
+      indexed: true
+    - name: follower_count
+      type: u64
+      stored: true
+      indexed: true
+    - name: is_verified
+      type: bool
+      stored: true
+      indexed: true
+    - name: is_private
+      type: bool
+      stored: true
+      indexed: true
+    - name: platform
+      type: text
+      tokenizer: raw
+      stored: true
+      indexed: true
+    - name: country
+      type: text
+      tokenizer: raw
+      stored: true
+      indexed: true
+    - name: scraped_at
+      type: text
+      tokenizer: raw
+      stored: true
+      indexed: true
+
+search_settings:
+  default_search_fields: [username, full_name, bio]
+

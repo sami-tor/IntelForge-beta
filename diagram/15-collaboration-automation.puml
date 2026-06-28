@@ -1,0 +1,60 @@
+@startuml Collaboration Diagram - Automated Data Collection & Indexing
+skinparam backgroundColor white
+skinparam linetype polyline
+skinparam ArrowColor #1565C0
+skinparam ArrowThickness 1
+skinparam defaultFontSize 11
+
+title Collaboration Diagram - Automated Data Collection and Indexing
+
+object Scheduler
+object TelegramScraper
+object WebScraper
+object DarkWebCrawler
+object FileWatcher
+object AutoIndexer
+object DocumentParser
+object OCRService
+object FaceProcessor
+object QuickwitIndexer
+object MilvusIndexer
+object MinIOStorage
+object ThreatMonitor
+object AlertSystem
+
+Scheduler --> TelegramScraper : 1: triggerScrape()
+Scheduler --> WebScraper : 2: triggerScrape()
+Scheduler --> DarkWebCrawler : 3: triggerScrape()
+
+TelegramScraper --> MinIOStorage : 4: saveData()
+WebScraper --> MinIOStorage : 5: saveData()
+DarkWebCrawler --> MinIOStorage : 6: saveData()
+
+FileWatcher --> FileWatcher : 7: detectNewFile()
+FileWatcher --> AutoIndexer : 8: notifyNewFile()
+
+AutoIndexer --> DocumentParser : 9: parseDocument()
+DocumentParser --> AutoIndexer : 10: extractedText
+
+AutoIndexer --> OCRService : 11: extractTextFromImage()
+OCRService --> AutoIndexer : 12: ocrText
+
+AutoIndexer --> FaceProcessor : 13: processImage()
+FaceProcessor --> AutoIndexer : 14: faceEmbeddings
+
+AutoIndexer --> QuickwitIndexer : 15: indexText()
+QuickwitIndexer --> AutoIndexer : 16: indexed
+
+AutoIndexer --> MilvusIndexer : 17: indexFaces()
+MilvusIndexer --> AutoIndexer : 18: indexed
+
+AutoIndexer --> MinIOStorage : 19: storeMetadata()
+
+ThreatMonitor --> QuickwitIndexer : 20: searchThreats()
+ThreatMonitor --> MilvusIndexer : 21: searchBrands()
+ThreatMonitor --> AlertSystem : 22: sendAlert()
+
+@enduml
+
+
+

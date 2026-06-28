@@ -1,0 +1,25 @@
+# Core
+mysql-connector-python==8.3.0
+pymysql==1.1.0
+sqlalchemy==2.0.25
+python-dotenv==1.0.1
+requests==2.31.0
+
+# Face AI (CUDA 11.8 + cuDNN 8.9.7)
+insightface==0.7.3
+onnxruntime-gpu==1.15.1  # Requires CUDA 11.8
+opencv-python==4.9.0.80
+numpy==1.26.4  # Must be <2 for InsightFace compatibility
+# faiss-gpu installed via conda: conda install -c pytorch -c nvidia faiss-gpu cudatoolkit=11.8
+
+# Telegram
+python-telegram-bot==20.8
+
+# Utils
+tqdm==4.66.1
+pillow==10.2.0
+loguru==0.7.2
+
+# Web UI
+streamlit==1.31.0
+plotly==5.18.0

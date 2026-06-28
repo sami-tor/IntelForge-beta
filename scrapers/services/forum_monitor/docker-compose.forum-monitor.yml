@@ -1,0 +1,20 @@
+services:
+  forum-monitor:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: intelforge-forum-monitor
+    environment:
+      - POSTGRES_HOST=intelforge-postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=intelforge
+      - POSTGRES_USER=intelforge
+      - POSTGRES_PASSWORD=changeme
+      - CHECK_INTERVAL=300
+    restart: unless-stopped
+    networks:
+      - code_intelforge-network
+
+networks:
+  code_intelforge-network:
+    external: true

@@ -1,0 +1,85 @@
+version: 0.6
+
+index_id: osint-data-images
+index_uri: file:///quickwit/data/indexes/osint-data-images
+
+doc_mapping:
+  mode: lenient
+  field_mappings:
+    - name: timestamp
+      type: datetime
+      input_formats:
+        - unix_timestamp
+      fast: true
+      indexed: true
+    - name: file_path
+      type: text
+      tokenizer: raw
+      stored: true
+      indexed: true
+    - name: file_name
+      type: text
+      tokenizer: default
+      stored: true
+      indexed: true
+    - name: file_type
+      type: text
+      tokenizer: raw
+      stored: true
+      indexed: true
+    - name: country
+      type: text
+      tokenizer: raw
+      stored: true
+      indexed: true
+    - name: category
+      type: text
+      tokenizer: raw
+      stored: true
+      indexed: true
+    - name: media_type
+      type: text
+      tokenizer: raw
+      stored: true
+      indexed: true
+    - name: image_width
+      type: u64
+      stored: true
+      indexed: true
+    - name: image_height
+      type: u64
+      stored: true
+      indexed: true
+    - name: embedding_id
+      type: text
+      tokenizer: raw
+      stored: true
+      indexed: true
+    - name: thumbnail_path
+      type: text
+      tokenizer: raw
+      stored: true
+      indexed: true
+    - name: ocr_text
+      type: text
+      tokenizer: default
+      stored: true
+      indexed: true
+      record: position
+    - name: file_size
+      type: u64
+      stored: true
+      indexed: true
+    - name: detected_objects
+      type: json
+      stored: true
+      indexed: true
+    - name: perceptual_hash
+      type: text
+      tokenizer: raw
+      stored: true
+      indexed: true
+
+search_settings:
+  default_search_fields: [file_name, file_path, ocr_text]
+
