@@ -95,12 +95,8 @@ intelforge/
 │   └── profiles/               # User profile images, avatars
 │
 ├── scripts/                    # Database migrations, seed data, utilities
-├── tests/                      # (moved to src/tests/) — test suite runner
-├── docs/                       # Project documentation
-│   ├── defence/                # FYP defence docs, QA, demo script, diagrams
-│   ├── FYP_Docs/               # SRS, Gantt charts, report templates, tools
-│   └── Presentations/          # Project presentations (PPTX)
-├── diagram/                    # PlantUML architecture diagrams (21 diagrams)
+├── docs/                       # Setup, API reference, architecture docs
+├── diagram/                    # PlantUML architecture diagrams
 └── docker-compose.quickwit.yml # Quickwit search cluster Docker compose
 ```
 
@@ -201,7 +197,6 @@ After running migrations (`npm run db:migrate`), a default admin account is seed
 | [docs/SETUP.md](docs/SETUP.md) | Installation, Docker, env vars, first run |
 | [docs/API-REFERENCE.md](docs/API-REFERENCE.md) | All REST APIs (137 routes) |
 | [docs/CODEBASE-DEEP-STRUCTURE.md](docs/CODEBASE-DEEP-STRUCTURE.md) | Full architecture deep-dive |
-| [docs/defence/](docs/defence/) | FYP defence diagrams, QA, demo script |
 | [docs/GITHUB-PUBLISH-PLAN.md](docs/GITHUB-PUBLISH-PLAN.md) | How this repo was prepared for GitHub |
 
 ---

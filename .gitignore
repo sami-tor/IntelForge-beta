@@ -84,8 +84,10 @@ agent-transcripts/
 .planning/
 .device-quotas.json
 
-# personal FYP documents (student emails, local paths)
+# personal / academic artifacts (not part of public code repo)
 docs/FYP_Docs/
+docs/Presentations/
+docs/defence/
 
 # PlantUML renderer (download with: scripts/demo.ps1)
 diagram/plantuml.jar
