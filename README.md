@@ -1,13 +1,27 @@
-# IntelForge-beta
+<p align="center">
+  <img src="docs/images/intelforge-hero.png" alt="IntelForge — Threat Intelligence Platform landing page with OSINT search across 268B+ records" width="100%" />
+</p>
 
-> A full-stack, multi-service Cyber Threat Intelligence (CTI) OSINT platform for security analysts to monitor, correlate, and act on cyber threats in real time.
+<h1 align="center">IntelForge-beta</h1>
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Next.js](https://img.shields.io/badge/Next.js-16-black)](https://nextjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)](https://www.typescriptlang.org/)
+<p align="center">
+  <strong>Intelligence at Machine Speed</strong><br />
+  A full-stack Cyber Threat Intelligence (CTI) OSINT platform for security analysts to monitor, correlate, and act on cyber threats in real time.
+</p>
 
-**Repository:** `IntelForge-beta` (public beta)  
-**Documentation:** [`docs/`](docs/) · [Setup Guide](docs/SETUP.md) · [API Reference](docs/API-REFERENCE.md) · [Architecture](docs/CODEBASE-DEEP-STRUCTURE.md)
+<p align="center">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT" /></a>
+  <a href="https://nextjs.org/"><img src="https://img.shields.io/badge/Next.js-16-black" alt="Next.js 16" /></a>
+  <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-5-blue" alt="TypeScript 5" /></a>
+</p>
+
+<p align="center">
+  <strong>Repository:</strong> <code>IntelForge-beta</code> (public beta)<br />
+  <a href="docs/SETUP.md">Setup Guide</a> ·
+  <a href="docs/API-REFERENCE.md">API Reference</a> ·
+  <a href="docs/CODEBASE-DEEP-STRUCTURE.md">Architecture</a> ·
+  <a href="docs/">Documentation</a>
+</p>
 
 ---
 
